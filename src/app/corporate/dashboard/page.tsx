@@ -156,7 +156,7 @@ export default function CorporateDashboard() {
           transition={{ delay: 0.2 }}
           className="mb-8"
         >
-          <h2 className="text-xl font-semibold text-foreground mb-4">Cywareness Tools</h2>
+          <h2 className="text-xl font-semibold text-foreground mb-4">CyberSkill Tools</h2>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <Card className="cyber-card hover:border-primary/50 transition-colors cursor-pointer group">
               <CardContent className="p-6">

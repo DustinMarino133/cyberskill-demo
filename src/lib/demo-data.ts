@@ -354,7 +354,7 @@ export const demoEmployees: Employee[] = [
 export const demoCorporate: CorporateProfile = {
   ...demoUsers[2],
   role: 'corporate',
-  company: 'TechCorp Industries',
+  company: 'CyberVision Risk Dashboard',
   department: 'IT Security',
   employees: demoEmployees,
   securityScore: 78,
