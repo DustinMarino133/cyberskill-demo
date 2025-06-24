@@ -1,0 +1,144 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+@layer components {
+  /* Enhanced grid patterns */
+  .cyber-grid {
+    @apply bg-grid-pattern bg-grid;
+  }
+  
+  .cyber-grid-lg {
+    @apply bg-cyber-grid bg-grid-lg;
+  }
+  
+  /* Kokonut UI inspired glassmorphism */
+  .glassmorphism {
+    @apply backdrop-blur-md bg-white/5 border border-white/10 shadow-2xl;
+  }
+  
+  .glassmorphism-strong {
+    @apply backdrop-blur-xl bg-white/10 border border-white/20 shadow-2xl;
+  }
+  
+  /* Enhanced glow effects */
+  .cyber-glow {
+    @apply shadow-xl shadow-primary/25;
+  }
+  
+  .cyber-glow-strong {
+    @apply shadow-2xl shadow-primary/40;
+  }
+  
+  /* Modern card styles */
+  .cyber-card {
+    @apply bg-card border border-border rounded-xl p-6 cyber-glow backdrop-blur-sm;
+  }
+  
+  .kokonut-card {
+    @apply bg-gradient-to-br from-card to-card/80 border border-white/10 rounded-2xl p-6 backdrop-blur-md shadow-2xl;
+  }
+  
+  /* Button enhancements */
+  .kokonut-button {
+    @apply relative overflow-hidden rounded-xl px-6 py-3 font-semibold transition-all duration-300 transform hover:scale-105;
+  }
+  
+  .kokonut-button-primary {
+    @apply bg-gradient-to-r from-primary to-primary-600 text-white shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/40;
+  }
+  
+  /* Text effects */
+  .gradient-text {
+    @apply bg-gradient-to-r from-primary via-cyber-blue to-cyber-purple bg-clip-text text-transparent;
+  }
+  
+  .glow-text {
+    @apply text-white;
+    text-shadow: 0 0 10px rgba(83, 109, 226, 0.5);
+  }
+  
+  /* Enhanced animations */
+  .animate-on-scroll {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .animate-on-scroll.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  
+  .float-animation {
+    @apply animate-float;
+  }
+  
+  /* Kokonut UI inspired layouts */
+  .kokonut-hero {
+    @apply relative min-h-screen flex items-center justify-center overflow-hidden;
+  }
+  
+  .kokonut-section {
+    @apply relative py-24 px-4;
+  }
+  
+  /* Enhanced grid layouts */
+  .kokonut-grid {
+    @apply grid gap-6 md:gap-8;
+  }
+  
+  .kokonut-grid-2 {
+    @apply kokonut-grid md:grid-cols-2;
+  }
+  
+  .kokonut-grid-3 {
+    @apply kokonut-grid md:grid-cols-2 lg:grid-cols-3;
+  }
+  
+  .kokonut-grid-4 {
+    @apply kokonut-grid md:grid-cols-2 lg:grid-cols-4;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+  
+  /* Custom shadows */
+  .shadow-cyber {
+    box-shadow: 0 0 20px rgba(83, 109, 226, 0.3);
+  }
+  
+  .shadow-cyber-strong {
+    box-shadow: 0 0 40px rgba(83, 109, 226, 0.5);
+  }
+  
+  /* Border gradients */
+  .border-gradient {
+    @apply relative;
+  }
+  
+  .border-gradient::before {
+    content: '';
+    @apply absolute inset-0 rounded-xl p-[1px] bg-gradient-to-r from-primary via-cyber-blue to-cyber-purple;
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask-composite: xor;
+  }
+}
