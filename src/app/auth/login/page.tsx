@@ -16,7 +16,7 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [selectedPlatform, setSelectedPlatform] = useState<'student' | 'teacher' | 'corporate'>('student');
+  const [, setSelectedPlatform] = useState<'student' | 'teacher' | 'corporate'>('student');
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
@@ -49,7 +49,7 @@ export default function LoginPage() {
       } else {
         toast.error('Invalid credentials. Please use the demo accounts.');
       }
-    } catch (error) {
+    } catch {
       toast.error('Login failed. Please try again.');
     } finally {
       setIsLoading(false);

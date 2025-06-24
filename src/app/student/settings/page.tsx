@@ -6,7 +6,7 @@ import { motion } from 'framer-motion';
 import { 
   Settings as SettingsIcon, Palette, Monitor, User, Shield,
   ChevronLeft, Check, Zap, Eye, Volume2, Bell, Globe,
-  Moon, Sun, Smartphone, Laptop, Desktop, Save
+  Moon, Sun, Smartphone, Laptop, Save
 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';

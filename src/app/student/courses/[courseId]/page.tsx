@@ -400,13 +400,12 @@ export default function CourseViewPage() {
                             whileTap={{ scale: 0.98 }}
                             onClick={() => handleVideoSelect(video)}
                             className={`flex items-center space-x-3 p-3 rounded-lg cursor-pointer transition-all ${
-                              currentVideo?.id === video.id ? 'ring-2' : ''
+                              currentVideo?.id === video.id ? 'ring-2 ring-primary' : ''
                             }`}
                             style={{ 
                               backgroundColor: currentVideo?.id === video.id 
                                 ? `${currentTheme.colors.primary}20` 
-                                : `${currentTheme.colors.surface}50`,
-                              ringColor: currentVideo?.id === video.id ? currentTheme.colors.primary : 'transparent'
+                                : `${currentTheme.colors.surface}50`
                             }}
                           >
                             <div className="relative">
@@ -546,7 +545,7 @@ export default function CourseViewPage() {
                 {/* Course Skills */}
                 <div className="mb-6">
                   <h3 className="font-semibold mb-3" style={{ color: currentTheme.colors.text }}>
-                    Skills You'll Learn
+                    Skills You&apos;ll Learn
                   </h3>
                   <div className="flex flex-wrap gap-2">
                     {course.skills.map((skill) => (

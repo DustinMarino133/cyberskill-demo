@@ -363,7 +363,7 @@ export default function InternshipsPage() {
 
                 {/* Skills */}
                 <div>
-                  <div className="text-sm font-medium mb-2">Skills you'll learn:</div>
+                  <div className="text-sm font-medium mb-2">Skills you&apos;ll learn:</div>
                   <div className="flex flex-wrap gap-2">
                     {internship.skills.map((skill) => (
                       <Badge key={skill} variant="outline" className="text-xs">

@@ -109,11 +109,13 @@ export default function QuizPage() {
         },
         'true-false': {
           question: `${topic} is considered a fundamental component of cybersecurity defense.`,
+          options: undefined,
           correct: 'true',
           explanation: `Yes, ${topic} plays a crucial role in maintaining cybersecurity defenses.`
         },
         'fill-blank': {
           question: `The primary purpose of ${topic} is to _____ against security threats.`,
+          options: undefined,
           correct: 'protect',
           explanation: `${topic} is designed to protect systems and data from various security threats.`
         }
@@ -125,7 +127,7 @@ export default function QuizPage() {
         id: `q${index + 1}`,
         question: template.question,
         type: questionType,
-        options: template.options || undefined,
+        options: template.options,
         correct: template.correct,
         explanation: template.explanation,
         points: basePoints
@@ -170,7 +172,8 @@ export default function QuizPage() {
     }
 
     const currentQuestion = quiz.questions[currentQuestionIndex];
-    const isCorrect = selectedAnswer.toLowerCase().trim() === currentQuestion.correct.toLowerCase().trim();
+    const correctAnswer = Array.isArray(currentQuestion.correct) ? currentQuestion.correct[0] : currentQuestion.correct;
+    const isCorrect = selectedAnswer.toLowerCase().trim() === correctAnswer.toLowerCase().trim();
     const timeSpent = Date.now() - questionStartTime;
 
     const newAnswer: QuizAnswer = {

@@ -469,7 +469,7 @@ export default function CoursesPage() {
                       </div>
 
                       <div className="mb-4">
-                        <div className="text-sm text-muted-foreground mb-2">Skills you'll learn:</div>
+                        <div className="text-sm text-muted-foreground mb-2">Skills you&apos;ll learn:</div>
                         <div className="flex flex-wrap gap-1">
                           {course.skills.slice(0, 3).map((skill) => (
                             <Badge key={skill} variant="outline" className="text-xs" style={{ borderColor: currentTheme.colors.border, color: currentTheme.colors.text }}>
@@ -715,7 +715,7 @@ export default function CoursesPage() {
 
                       {/* Skills */}
                       <div>
-                        <h3 className="text-lg font-semibold mb-4" style={{ color: currentTheme.colors.text }}>Skills You'll Learn</h3>
+                        <h3 className="text-lg font-semibold mb-4" style={{ color: currentTheme.colors.text }}>Skills You&apos;ll Learn</h3>
                         <div className="grid grid-cols-2 gap-2">
                           {selectedCourse.skills.map((skill) => (
                             <div

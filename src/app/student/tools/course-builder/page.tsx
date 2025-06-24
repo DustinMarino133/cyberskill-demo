@@ -53,9 +53,9 @@ export default function CourseBuilderPage() {
   const [savedCourses, setSavedCourses] = useState<CustomCourse[]>([]);
   const [formData, setFormData] = useState({
     topic: '',
-    difficulty: 'intermediate' as const,
+    difficulty: 'intermediate' as 'beginner' | 'intermediate' | 'advanced',
     duration: '4',
-    focus: 'practical' as const,
+    focus: 'practical' as 'theoretical' | 'practical' | 'balanced',
     includeQuizzes: true,
     includeHandsOn: true
   });
