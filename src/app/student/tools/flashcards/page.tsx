@@ -322,6 +322,32 @@ export default function FlashcardsPage() {
     }, 600);
   };
 
+  const markCard = (correct: boolean) => {
+    if (!flashcardSet) return;
+
+    if (mode === 'adaptive') {
+      handleAdaptiveAnswer(correct);
+      return;
+    }
+
+    // Regular study mode logic
+    const newStudiedCards = new Set(studiedCards);
+    newStudiedCards.add(currentCardIndex);
+    setStudiedCards(newStudiedCards);
+
+    setStudyStats(prev => ({
+      correct: correct ? prev.correct + 1 : prev.correct,
+      incorrect: correct ? prev.incorrect : prev.incorrect + 1,
+      remaining: Math.max(0, prev.remaining - 1)
+    }));
+
+    if (currentCardIndex < flashcardSet.cards.length - 1) {
+      nextCard();
+    } else {
+      setMode('review');
+    }
+  };
+
   const nextCard = () => {
     if (!flashcardSet || currentCardIndex >= flashcardSet.cards.length - 1) return;
     setCurrentCardIndex(prev => prev + 1);
