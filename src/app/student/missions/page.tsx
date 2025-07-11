@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import React, { useState, useEffect, useMemo } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Target, Trophy, Calendar, Clock, Star, 
   Zap, CheckCircle, Lock, Gift, Flame,
@@ -45,8 +45,26 @@ export default function MissionsPage() {
     totalXPEarned: 12450
   });
 
-  const missions: Mission[] = [
-    // Daily Missions
+  const missions = useMemo(() => [
+    {
+      id: 'daily-1',
+      title: 'Daily Login Streak',
+      description: 'Log in to CyberSkill for 7 consecutive days',
+      type: 'daily' as const,
+      category: 'social' as const,
+      progress: 5,
+      maxProgress: 7,
+      reward: {
+        xp: 100,
+        coins: 50,
+        item: 'Streak Badge'
+      },
+      difficulty: 'easy' as const,
+      timeLeft: '2h 15m',
+      completed: false,
+      locked: false,
+      icon: Calendar
+    },
     {
       id: 'daily-quiz',
       title: 'Knowledge Check',
@@ -169,9 +187,9 @@ export default function MissionsPage() {
       locked: true,
       icon: Trophy
     }
-  ];
+  ], []);
 
-  const completedMissionsList: Mission[] = [
+  const completedMissionsList = useMemo(() => [
     {
       id: 'completed-1',
       title: 'First Steps',
@@ -200,7 +218,7 @@ export default function MissionsPage() {
       locked: false,
       icon: Brain
     }
-  ];
+  ], []);
 
   useEffect(() => {
     const active = missions.filter(m => !m.completed);

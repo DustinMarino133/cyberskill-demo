@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
@@ -70,17 +70,17 @@ export default function CourseBuilderPage() {
   const router = useRouter();
 
   // Demo projects
-  const demoProjects: CourseProject[] = [
+  const demoProjects = useMemo(() => [
     {
       id: 'demo-1',
       title: 'Intro to Password Security',
       description: 'A comprehensive guide to creating and managing secure passwords',
       thumbnail: '/api/placeholder/300/200',
-      difficulty: 'beginner',
+      difficulty: 'beginner' as const,
       lessons: [
-        { id: 'l1', title: 'What Makes a Strong Password?', type: 'text', content: 'Learn the basics...', duration: 10, order: 1 },
-        { id: 'l2', title: 'Password Managers Explained', type: 'video', content: 'Video content...', duration: 15, order: 2 },
-        { id: 'l3', title: 'Test Your Knowledge', type: 'quiz', content: 'Quiz questions...', duration: 5, order: 3 }
+        { id: 'l1', title: 'What Makes a Strong Password?', type: 'text' as const, content: 'Learn the basics...', duration: 10, order: 1 },
+        { id: 'l2', title: 'Password Managers Explained', type: 'video' as const, content: 'Video content...', duration: 15, order: 2 },
+        { id: 'l3', title: 'Test Your Knowledge', type: 'quiz' as const, content: 'Quiz questions...', duration: 5, order: 3 }
       ],
       tags: ['passwords', 'security', 'beginner'],
       isPublic: true,
@@ -93,10 +93,10 @@ export default function CourseBuilderPage() {
       title: 'Email Safety Masterclass',
       description: 'Advanced techniques for identifying and avoiding email threats',
       thumbnail: '/api/placeholder/300/200',
-      difficulty: 'intermediate',
+      difficulty: 'intermediate' as const,
       lessons: [
-        { id: 'l1', title: 'Spotting Phishing Emails', type: 'interactive', content: 'Interactive examples...', duration: 20, order: 1 },
-        { id: 'l2', title: 'Email Header Analysis', type: 'text', content: 'Technical content...', duration: 15, order: 2 }
+        { id: 'l1', title: 'Spotting Phishing Emails', type: 'interactive' as const, content: 'Interactive examples...', duration: 20, order: 1 },
+        { id: 'l2', title: 'Email Header Analysis', type: 'text' as const, content: 'Technical content...', duration: 15, order: 2 }
       ],
       tags: ['email', 'phishing', 'advanced'],
       isPublic: false,
@@ -104,7 +104,7 @@ export default function CourseBuilderPage() {
       lastModified: new Date('2024-01-18'),
       estimatedDuration: 35
     }
-  ];
+  ], []);
 
   useEffect(() => {
     const currentUser = localStorage.getItem('currentUser');

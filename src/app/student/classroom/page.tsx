@@ -74,7 +74,7 @@ export default function ClassroomPage() {
   const [user, setUser] = useState<StudentProfile | null>(null);
   const [showAppsMenu, setShowAppsMenu] = useState(false);
   const [currentTab, setCurrentTab] = useState<'overview' | 'assignments' | 'members' | 'virtual-labs' | 'announcements' | 'calendar' | 'grades'>('overview');
-  const [selectedAssignment, setSelectedAssignment] = useState<Assignment | null>(null);
+  const [selectedAssignment, setSelectedAssignment] = useState<SchoolAssignment | null>(null);
   const [showAssignmentModal, setShowAssignmentModal] = useState(false);
   const router = useRouter();
 
