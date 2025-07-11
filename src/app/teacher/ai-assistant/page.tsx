@@ -166,8 +166,9 @@ Would you like me to generate more questions or help you create a complete quiz?
   }, [router]);
 
   useEffect(() => {
+    const currentChatMessages = chats[currentChatId];
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [chats[currentChatId]]);
+  }, [chats, currentChatId]);
 
   const generateAiResponse = (message: string): string => {
     const lowerMessage = message.toLowerCase();

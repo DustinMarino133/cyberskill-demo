@@ -146,7 +146,7 @@ export default function FlashcardsPage() {
       }, autoPlaySpeed);
     }
     return () => clearInterval(interval);
-  }, [isAutoPlay, currentSide, autoPlaySpeed, mode]);
+  }, [isAutoPlay, currentSide, autoPlaySpeed, mode, flashcardSet, flipCard, nextCard]);
 
   const generateAdaptiveCard = (topic: string, difficulty: DifficultyLevel) => {
     const topicData = GRADE_APPROPRIATE_TOPICS.find(t => t.id === topic);
