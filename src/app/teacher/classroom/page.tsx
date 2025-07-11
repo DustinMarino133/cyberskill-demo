@@ -399,7 +399,7 @@ What would you like help with today?`;
       status: 'draft' as const
     };
     
-    setQuizzes(prev => [...prev, quiz]);
+    setQuizzes(prev => [...prev, quiz] as any);
     setShowQuizModal(false);
     setNewQuiz({ title: '', description: '', difficulty: 'medium', timeLimit: 30, questions: [] });
   };

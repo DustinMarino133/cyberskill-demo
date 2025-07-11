@@ -77,10 +77,14 @@ export interface Quiz {
   title: string;
   description: string;
   questions: Question[];
-  timeLimit?: number;
+  timeLimit: number;
   difficulty: 'easy' | 'medium' | 'hard';
   topic: string;
   points: number;
+  createdBy?: string;
+  createdAt?: Date;
+  tags?: string[];
+  passingScore?: number;
 }
 
 export interface Question {

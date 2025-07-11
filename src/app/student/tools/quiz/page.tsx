@@ -284,7 +284,7 @@ export default function QuizPage() {
       topic: config.topic,
       difficulty: config.difficulty,
       questionCount: currentQuiz.questions.length,
-      timeLimit: currentQuiz.timeLimit,
+      timeLimit: currentQuiz.timeLimit || 300,
       createdAt: new Date().toISOString(),
       timesPlayed: 0,
       questions: currentQuiz.questions
@@ -306,6 +306,9 @@ export default function QuizPage() {
         description: savedQuiz.description,
         questions: savedQuiz.questions.length > 0 ? savedQuiz.questions : [],
         timeLimit: savedQuiz.timeLimit,
+        difficulty: savedQuiz.difficulty,
+        topic: savedQuiz.topic,
+        points: savedQuiz.questions.reduce((total, q) => total + q.points, 0),
         passingScore: 70,
         createdBy: user?.id || 'student',
         createdAt: new Date(),
