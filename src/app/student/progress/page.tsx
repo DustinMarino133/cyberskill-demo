@@ -1,23 +1,39 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  TrendingUp, Award, Target, Clock, Zap, BookOpen,
+  TrendingUp, Award, Target, Clock, BookOpen,
   Calendar, CheckCircle, Trophy, Star, Brain,
-  BarChart3, PieChart, LineChart, Activity, Medal,
-  ChevronLeft, ChevronRight, Eye, ArrowUp, ArrowDown, Flame
+  BarChart3, Activity, Medal, Crown, ChevronRight, Users,
+  Timer, Shield, Eye, TrendingDown, ArrowUp, ArrowDown,
+  Sparkles, Flame, Zap, Heart, Gem, Lock, Gift,
+  Sword, Map, Compass, Gamepad2, Rocket, Diamond
 } from 'lucide-react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import Navbar from '@/components/shared/Navbar';
 import { StudentProfile } from '@/lib/types';
 import { demoStudent } from '@/lib/demo-data';
-import { useTheme } from '@/contexts/ThemeContext';
-import { toast } from 'react-hot-toast';
+
+interface Achievement {
+  id: string;
+  title: string;
+  description: string;
+  longDescription: string;
+  icon: React.ComponentType<any>;
+  earned: boolean;
+  earnedDate?: string;
+  rarity: 'common' | 'rare' | 'epic' | 'legendary' | 'mythic';
+  points: number;
+  category: string;
+  requirements?: string;
+  progress?: number;
+  maxProgress?: number;
+}
 
 interface ProgressData {
   totalXP: number;
@@ -27,78 +43,279 @@ interface ProgressData {
   streak: number;
   coursesCompleted: number;
   coursesInProgress: number;
-  skillsLearned: string[];
   achievements: Achievement[];
-  weeklyProgress: WeeklyProgress[];
-  courseProgress: CourseProgress[];
-  skillProgress: SkillProgress[];
   studyStats: StudyStats;
 }
 
-interface Achievement {
-  id: string;
-  title: string;
-  description: string;
-  icon: string;
-  earned: boolean;
-  earnedDate?: string;
-  rarity: 'common' | 'rare' | 'epic' | 'legendary';
-  points: number;
-}
-
-interface WeeklyProgress {
-  week: string;
-  xp: number;
-  timeSpent: number;
-  coursesCompleted: number;
-  quizzesTaken: number;
-}
-
-interface CourseProgress {
-  id: string;
-  title: string;
-  category: string;
-  progress: number;
-  timeSpent: number;
-  lastActivity: string;
-  status: 'not-started' | 'in-progress' | 'completed';
-}
-
-interface SkillProgress {
-  skill: string;
-  level: number;
-  xp: number;
-  maxXP: number;
-  courses: string[];
-  lastPracticed: string;
-}
-
 interface StudyStats {
-  averageSessionTime: number;
   totalStudyTime: number;
-  bestStreak: number;
-  favoriteCategory: string;
-  strongestSkill: string;
-  weeklyGoal: number;
-  weeklyProgress: number;
+  averageSessionTime: number;
+  accuracy: number;
+  rank: number;
+  perfectScores: number;
+  questionsAnswered: number;
+  hintsUsed: number;
+  fastestCompletion: number;
 }
+
+const ACHIEVEMENTS_DATA: Achievement[] = [
+  // Legendary Achievements
+  {
+    id: 'cyber-master',
+    title: 'Cybersecurity Master',
+    description: 'Complete all cybersecurity courses with perfect scores',
+    longDescription: 'You have mastered every aspect of cybersecurity education, achieving perfect scores across all courses. This legendary achievement marks you as a true cybersecurity expert.',
+    icon: Crown,
+    earned: false,
+    rarity: 'legendary',
+    points: 2500,
+    category: 'Mastery',
+    requirements: 'Complete all courses with 100% scores',
+    progress: 7,
+    maxProgress: 12
+  },
+  {
+    id: 'legend-streak',
+    title: 'Legendary Streak',
+    description: 'Maintain a 100-day learning streak',
+    longDescription: 'Your dedication knows no bounds! Maintaining a 100-day learning streak shows incredible commitment to cybersecurity education.',
+    icon: Flame,
+    earned: false,
+    rarity: 'legendary',
+    points: 2000,
+    category: 'Dedication',
+    requirements: 'Study for 100 consecutive days',
+    progress: 23,
+    maxProgress: 100
+  },
+
+  // Epic Achievements
+  {
+    id: 'speed-demon',
+    title: 'Speed Demon',
+    description: 'Complete advanced assessments in record time',
+    longDescription: 'Lightning fast and accurate! You\'ve demonstrated exceptional skill by completing complex cybersecurity assessments faster than anyone else.',
+    icon: Rocket,
+    earned: true,
+    earnedDate: '2024-02-08',
+    rarity: 'epic',
+    points: 800,
+    category: 'Performance',
+    requirements: 'Complete 5 assessments in under 10 minutes'
+  },
+  {
+    id: 'perfect-mind',
+    title: 'Perfect Mind',
+    description: 'Achieve 20 perfect scores in a row',
+    longDescription: 'Flawless execution! Your streak of perfect scores demonstrates mastery of cybersecurity concepts and attention to detail.',
+    icon: Diamond,
+      earned: true,
+    earnedDate: '2024-02-15',
+    rarity: 'epic',
+    points: 750,
+    category: 'Excellence',
+    requirements: 'Score 100% on 20 consecutive quizzes'
+  },
+  {
+    id: 'course-conqueror',
+    title: 'Course Conqueror',
+    description: 'Complete 10 cybersecurity courses',
+    longDescription: 'A true scholar! You\'ve conquered multiple cybersecurity domains, building expertise across the field.',
+    icon: Trophy,
+    earned: false,
+    rarity: 'epic',
+    points: 1000,
+    category: 'Learning',
+    requirements: 'Complete 10 different courses',
+    progress: 7,
+    maxProgress: 10
+  },
+  {
+    id: 'mentor-supreme',
+    title: 'Mentor Supreme',
+    description: 'Help 50 fellow students succeed',
+    longDescription: 'Your knowledge shines brightest when shared! You\'ve helped dozens of students on their cybersecurity journey.',
+    icon: Users,
+    earned: false,
+    rarity: 'epic',
+    points: 900,
+    category: 'Community',
+    requirements: 'Successfully mentor 50 students',
+    progress: 12,
+    maxProgress: 50
+  },
+
+  // Rare Achievements
+  {
+    id: 'consistency-king',
+    title: 'Consistency King',
+    description: 'Maintain a 30-day learning streak',
+    longDescription: 'Consistency is key to mastery! Your dedication to daily learning shows true commitment to cybersecurity education.',
+    icon: Activity,
+      earned: true,
+      earnedDate: '2024-01-22',
+      rarity: 'rare',
+    points: 400,
+    category: 'Consistency',
+    requirements: 'Study for 30 consecutive days'
+  },
+  {
+    id: 'night-owl',
+    title: 'Night Owl Scholar',
+    description: 'Complete 25 late-night study sessions',
+    longDescription: 'Burning the midnight oil! Your dedication to learning extends well into the night hours.',
+    icon: Eye,
+      earned: true,
+    earnedDate: '2024-02-10',
+    rarity: 'rare',
+    points: 350,
+    category: 'Dedication',
+    requirements: 'Study between 10 PM and 2 AM for 25 sessions'
+  },
+  {
+    id: 'quiz-champion',
+    title: 'Quiz Champion',
+    description: 'Excel in 100 practice quizzes',
+    longDescription: 'Practice makes perfect! You\'ve demonstrated exceptional knowledge through consistent quiz performance.',
+    icon: Brain,
+    earned: false,
+    rarity: 'rare',
+      points: 500,
+    category: 'Knowledge',
+    requirements: 'Score 85%+ on 100 quizzes',
+    progress: 67,
+    maxProgress: 100
+  },
+  {
+    id: 'social-butterfly',
+    title: 'Social Butterfly',
+    description: 'Connect with 25 classmates',
+    longDescription: 'Learning is better together! You\'ve built a strong network within the cybersecurity community.',
+    icon: Heart,
+      earned: true,
+    earnedDate: '2024-02-12',
+      rarity: 'rare',
+      points: 300,
+    category: 'Social',
+    requirements: 'Connect with 25 different students'
+  },
+
+  // Common Achievements
+  {
+    id: 'first-steps',
+    title: 'First Steps',
+    description: 'Complete your first cybersecurity quiz',
+    longDescription: 'Every expert was once a beginner! You\'ve taken your first step into the world of cybersecurity.',
+    icon: Target,
+      earned: true,
+    earnedDate: '2024-01-15',
+    rarity: 'common',
+    points: 100,
+    category: 'Getting Started',
+    requirements: 'Complete your first quiz'
+  },
+  {
+    id: 'early-bird',
+    title: 'Early Bird',
+    description: 'Complete 10 morning study sessions',
+    longDescription: 'The early bird catches the worm! Starting your day with cybersecurity learning sets a productive tone.',
+    icon: Clock,
+    earned: true,
+    earnedDate: '2024-01-28',
+    rarity: 'common',
+    points: 150,
+    category: 'Habits',
+    requirements: 'Study before 8 AM for 10 sessions'
+  },
+  {
+    id: 'curious-learner',
+    title: 'Curious Learner',
+    description: 'Ask 25 thoughtful questions',
+    longDescription: 'Curiosity drives learning! Your thoughtful questions show engagement and desire to understand.',
+    icon: BookOpen,
+    earned: true,
+    earnedDate: '2024-02-01',
+    rarity: 'common',
+    points: 200,
+    category: 'Engagement',
+    requirements: 'Ask 25 questions in courses or forums'
+  },
+  {
+    id: 'tool-explorer',
+    title: 'Tool Explorer',
+    description: 'Try all 5 learning tools',
+    longDescription: 'Exploration leads to discovery! You\'ve experimented with all available learning tools to find your style.',
+    icon: Gamepad2,
+    earned: true,
+    earnedDate: '2024-02-03',
+    rarity: 'common',
+    points: 125,
+    category: 'Exploration',
+    requirements: 'Use Quiz Builder, Flashcards, AI Companion, Course Builder, and Calculator'
+  },
+
+  // Hidden/Special Achievements
+  {
+    id: 'easter-egg',
+    title: 'Secret Hunter',
+    description: 'Discover the hidden easter egg',
+    longDescription: 'You have a keen eye for details! Finding hidden secrets shows you pay attention to every aspect of your learning environment.',
+    icon: Gem,
+    earned: false,
+    rarity: 'mythic',
+    points: 1337,
+    category: 'Special',
+    requirements: '???'
+  },
+  {
+    id: 'code-breaker',
+    title: 'Code Breaker',
+    description: 'Solve the cryptography challenge',
+    longDescription: 'Your analytical mind has cracked the code! This special challenge tested your cryptography knowledge.',
+    icon: Shield,
+    earned: false,
+    rarity: 'mythic',
+    points: 999,
+    category: 'Special',
+    requirements: 'Solve the hidden cryptography puzzle'
+  }
+];
+
+const INITIAL_PROGRESS_DATA: ProgressData = {
+  totalXP: 12847,
+  level: 8,
+  xpToNextLevel: 1653,
+  currentLevelXP: 12847,
+  streak: 23,
+  coursesCompleted: 7,
+  coursesInProgress: 3,
+  achievements: ACHIEVEMENTS_DATA,
+  studyStats: {
+    totalStudyTime: 2847,
+    averageSessionTime: 45,
+    accuracy: 91,
+    rank: 127,
+    perfectScores: 23,
+    questionsAnswered: 1456,
+    hintsUsed: 89,
+    fastestCompletion: 3.2
+  }
+};
 
 export default function ProgressPage() {
   const [user, setUser] = useState<StudentProfile | null>(null);
-  const [progressData, setProgressData] = useState<ProgressData | null>(null);
-  const [selectedTimeRange, setSelectedTimeRange] = useState<'week' | 'month' | 'year'>('week');
-  const [showAllAchievements, setShowAllAchievements] = useState(false);
-  const { currentTheme } = useTheme();
+  const [progressData, setProgressData] = useState<ProgressData>(INITIAL_PROGRESS_DATA);
+  const [showAchievements, setShowAchievements] = useState<'all' | 'earned' | 'available' | 'legendary' | 'epic' | 'rare' | 'common'>('all');
+  const [selectedAchievement, setSelectedAchievement] = useState<Achievement | null>(null);
   const router = useRouter();
 
   useEffect(() => {
     const currentUser = localStorage.getItem('currentUser');
     if (currentUser) {
-      const userData = JSON.parse(currentUser);
-      if (userData.role === 'student') {
-        setUser(demoStudent);
-        loadProgressData();
-      } else {
+        const userData = JSON.parse(currentUser);
+        if (userData.role === 'student') {
+          setUser(demoStudent);
+        } else {
         router.push('/auth/login');
       }
     } else {
@@ -106,632 +323,373 @@ export default function ProgressPage() {
     }
   }, [router]);
 
-  const loadProgressData = () => {
-    // Simulate loading progress data
-    const data: ProgressData = {
-      totalXP: 2847,
-      level: 8,
-      xpToNextLevel: 453,
-      currentLevelXP: 2847,
-      streak: 12,
-      coursesCompleted: 3,
-      coursesInProgress: 2,
-      skillsLearned: ['Password Security', 'Phishing Detection', 'Network Basics', 'Encryption', 'Malware Analysis'],
-      achievements: [
-        {
-          id: 'first-quiz',
-          title: 'Quiz Master',
-          description: 'Complete your first quiz',
-          icon: '🎯',
-          earned: true,
-          earnedDate: '2024-01-15',
-          rarity: 'common',
-          points: 100
-        },
-        {
-          id: 'week-streak',
-          title: 'Dedicated Learner',
-          description: 'Maintain a 7-day learning streak',
-          icon: '🔥',
-          earned: true,
-          earnedDate: '2024-01-22',
-          rarity: 'rare',
-          points: 250
-        },
-        {
-          id: 'course-complete',
-          title: 'Course Champion',
-          description: 'Complete your first course',
-          icon: '🏆',
-          earned: true,
-          earnedDate: '2024-02-01',
-          rarity: 'epic',
-          points: 500
-        },
-        {
-          id: 'perfect-score',
-          title: 'Perfect Score',
-          description: 'Score 100% on a difficult quiz',
-          icon: '⭐',
-          earned: true,
-          earnedDate: '2024-02-05',
-          rarity: 'rare',
-          points: 300
-        },
-        {
-          id: 'cyber-expert',
-          title: 'Cyber Expert',
-          description: 'Reach level 10 in cybersecurity',
-          icon: '🛡️',
-          earned: false,
-          rarity: 'legendary',
-          points: 1000
-        },
-        {
-          id: 'mentor',
-          title: 'Mentor',
-          description: 'Help 5 other students',
-          icon: '👨‍🏫',
-          earned: false,
-          rarity: 'epic',
-          points: 750
-        }
-      ],
-      weeklyProgress: [
-        { week: 'Week 1', xp: 245, timeSpent: 180, coursesCompleted: 0, quizzesTaken: 3 },
-        { week: 'Week 2', xp: 380, timeSpent: 220, coursesCompleted: 1, quizzesTaken: 5 },
-        { week: 'Week 3', xp: 520, timeSpent: 300, coursesCompleted: 1, quizzesTaken: 7 },
-        { week: 'Week 4', xp: 650, timeSpent: 280, coursesCompleted: 1, quizzesTaken: 6 },
-        { week: 'Week 5', xp: 420, timeSpent: 240, coursesCompleted: 0, quizzesTaken: 4 },
-        { week: 'Week 6', xp: 632, timeSpent: 320, coursesCompleted: 0, quizzesTaken: 8 }
-      ],
-      courseProgress: [
-        {
-          id: 'cyber-101',
-          title: 'Cybersecurity Fundamentals',
-          category: 'Fundamentals',
-          progress: 100,
-          timeSpent: 240,
-          lastActivity: '2024-02-01',
-          status: 'completed'
-        },
-        {
-          id: 'network-security',
-          title: 'Network Security Essentials',
-          category: 'Network',
-          progress: 65,
-          timeSpent: 180,
-          lastActivity: '2024-02-10',
-          status: 'in-progress'
-        },
-        {
-          id: 'malware-analysis',
-          title: 'Malware Analysis',
-          category: 'Malware',
-          progress: 30,
-          timeSpent: 90,
-          lastActivity: '2024-02-08',
-          status: 'in-progress'
-        },
-        {
-          id: 'crypto-basics',
-          title: 'Cryptography Basics',
-          category: 'Cryptography',
-          progress: 0,
-          timeSpent: 0,
-          lastActivity: 'Never',
-          status: 'not-started'
-        }
-      ],
-      skillProgress: [
-        {
-          skill: 'Password Security',
-          level: 5,
-          xp: 850,
-          maxXP: 1000,
-          courses: ['Cybersecurity Fundamentals'],
-          lastPracticed: '2024-02-09'
-        },
-        {
-          skill: 'Network Security',
-          level: 3,
-          xp: 420,
-          maxXP: 600,
-          courses: ['Network Security Essentials'],
-          lastPracticed: '2024-02-10'
-        },
-        {
-          skill: 'Malware Detection',
-          level: 2,
-          xp: 180,
-          maxXP: 400,
-          courses: ['Malware Analysis'],
-          lastPracticed: '2024-02-08'
-        },
-        {
-          skill: 'Phishing Detection',
-          level: 4,
-          xp: 720,
-          maxXP: 800,
-          courses: ['Cybersecurity Fundamentals'],
-          lastPracticed: '2024-02-07'
-        }
-      ],
-      studyStats: {
-        averageSessionTime: 45,
-        totalStudyTime: 1320,
-        bestStreak: 15,
-        favoriteCategory: 'Network Security',
-        strongestSkill: 'Password Security',
-        weeklyGoal: 300,
-        weeklyProgress: 245
-      }
-    };
+  const filteredAchievements = useMemo(() => {
+    if (showAchievements === 'earned') {
+      return progressData.achievements.filter(a => a.earned);
+    } else if (showAchievements === 'available') {
+      return progressData.achievements.filter(a => !a.earned);
+    } else if (['legendary', 'epic', 'rare', 'common'].includes(showAchievements)) {
+      return progressData.achievements.filter(a => a.rarity === showAchievements);
+    }
+    return progressData.achievements;
+  }, [progressData.achievements, showAchievements]);
 
-    setProgressData(data);
-  };
-
-  const getRarityColor = (rarity: string) => {
+  const getRarityColor = useCallback((rarity: string) => {
     switch (rarity) {
-      case 'common': return 'bg-gray-500';
-      case 'rare': return 'bg-blue-500';
-      case 'epic': return 'bg-purple-500';
-      case 'legendary': return 'bg-yellow-500';
-      default: return 'bg-gray-500';
+      case 'common': return 'bg-gray-100 text-gray-700 border-gray-300';
+      case 'rare': return 'bg-blue-100 text-blue-700 border-blue-300';
+      case 'epic': return 'bg-purple-100 text-purple-700 border-purple-300';
+      case 'legendary': return 'bg-orange-100 text-orange-700 border-orange-300';
+      case 'mythic': return 'bg-pink-100 text-pink-700 border-pink-300';
+      default: return 'bg-gray-100 text-gray-700 border-gray-300';
     }
-  };
+  }, []);
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'completed': return 'text-cyber-green';
-      case 'in-progress': return 'text-cyber-blue';
-      case 'not-started': return 'text-muted-foreground';
-      default: return 'text-muted-foreground';
+  const getRarityGlow = useCallback((rarity: string) => {
+    switch (rarity) {
+      case 'common': return 'shadow-gray-200';
+      case 'rare': return 'shadow-blue-200';
+      case 'epic': return 'shadow-purple-200';
+      case 'legendary': return 'shadow-orange-200';
+      case 'mythic': return 'shadow-pink-200';
+      default: return 'shadow-gray-200';
     }
-  };
+  }, []);
 
-  if (!user || !progressData) {
+  const levelProgress = (progressData.totalXP % 1000) / 10;
+  const earnedAchievements = progressData.achievements.filter(a => a.earned);
+  const totalAchievements = progressData.achievements.length;
+
+  if (!user) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center" style={{ background: currentTheme.colors.background }}>
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 flex items-center justify-center">
         <div className="text-center">
-          <div className="w-8 h-8 border-2 border-t-transparent rounded-full animate-spin mx-auto mb-4" style={{ borderColor: currentTheme.colors.primary }}></div>
-          <p style={{ color: currentTheme.colors.textSecondary }}>Loading progress data...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+          <p className="text-blue-400 font-medium">Loading your achievements...</p>
         </div>
       </div>
     );
   }
 
-  const earnedAchievements = progressData.achievements.filter(a => a.earned);
-  const unearnedAchievements = progressData.achievements.filter(a => !a.earned);
-
   return (
-    <div className="min-h-screen" style={{ background: currentTheme.colors.background }}>
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800">
       <Navbar user={user} />
-      
+
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-8"
-        >
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h1 className="text-3xl font-bold flex items-center" style={{ color: currentTheme.colors.text }}>
-                <TrendingUp className="h-8 w-8 mr-3" style={{ color: currentTheme.colors.accent }} />
-                Your Progress
-              </h1>
-              <p className="mt-1" style={{ color: currentTheme.colors.textSecondary }}>
-                Track your cybersecurity learning journey
-              </p>
-            </div>
-            <Button 
-              variant="outline"
-              onClick={() => router.push('/student/dashboard')}
-              style={{ 
-                borderColor: currentTheme.colors.border,
-                color: currentTheme.colors.text 
-              }}
-            >
-              <ChevronLeft className="h-4 w-4 mr-2" />
-              Back to Dashboard
-            </Button>
-          </div>
-        </motion.div>
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-white mb-2">Your Achievements</h1>
+          <p className="text-gray-400">Track your cybersecurity learning journey and unlock rewards</p>
+        </div>
 
-        {/* Key Metrics */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8"
-        >
-          <Card className={currentTheme.styles.cardClass} style={{ borderColor: currentTheme.colors.border }}>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Total XP</p>
-                  <p className="text-2xl font-bold text-cyber-green">{progressData.totalXP.toLocaleString()}</p>
-                </div>
-                <div className="p-3 bg-cyber-green/10 rounded-full">
-                  <Zap className="h-6 w-6 text-cyber-green" />
-                </div>
-              </div>
-              <div className="mt-4">
-                <p className="text-xs text-muted-foreground">
-                  Level {progressData.level} • {progressData.xpToNextLevel} XP to level {progressData.level + 1}
-                </p>
-                <Progress 
-                  value={(progressData.currentLevelXP / (progressData.currentLevelXP + progressData.xpToNextLevel)) * 100} 
-                  className="mt-2 h-2"
-                />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className={currentTheme.styles.cardClass} style={{ borderColor: currentTheme.colors.border }}>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Current Streak</p>
-                  <p className="text-2xl font-bold text-orange-500">{progressData.streak}</p>
-                </div>
-                <div className="p-3 bg-orange-500/10 rounded-full">
-                  <Flame className="h-6 w-6 text-orange-500" />
-                </div>
-              </div>
-              <div className="mt-4">
-                <p className="text-xs text-muted-foreground">
-                  Best streak: {progressData.studyStats.bestStreak} days
-                </p>
-                <div className="mt-2 flex items-center text-xs text-orange-500">
-                  <ArrowUp className="h-3 w-3 mr-1" />
-                  Keep it up!
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className={currentTheme.styles.cardClass} style={{ borderColor: currentTheme.colors.border }}>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Courses Completed</p>
-                  <p className="text-2xl font-bold text-primary">{progressData.coursesCompleted}</p>
-                </div>
-                <div className="p-3 bg-primary/10 rounded-full">
-                  <BookOpen className="h-6 w-6 text-primary" />
-                </div>
-              </div>
-              <div className="mt-4">
-                <p className="text-xs text-muted-foreground">
-                  {progressData.coursesInProgress} in progress
-                </p>
-                <div className="mt-2 flex items-center text-xs text-primary">
-                  <Target className="h-3 w-3 mr-1" />
-                  {Math.round((progressData.coursesCompleted / (progressData.coursesCompleted + progressData.coursesInProgress)) * 100)}% completion rate
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className={currentTheme.styles.cardClass} style={{ borderColor: currentTheme.colors.border }}>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Study Time</p>
-                  <p className="text-2xl font-bold text-cyber-blue">{Math.round(progressData.studyStats.totalStudyTime / 60)}h</p>
-                </div>
-                <div className="p-3 bg-cyber-blue/10 rounded-full">
-                  <Clock className="h-6 w-6 text-cyber-blue" />
-                </div>
-              </div>
-              <div className="mt-4">
-                <p className="text-xs text-muted-foreground">
-                  Avg. session: {progressData.studyStats.averageSessionTime}min
-                </p>
-                <div className="mt-2 flex items-center text-xs text-cyber-blue">
-                  <Activity className="h-3 w-3 mr-1" />
-                  {progressData.studyStats.totalStudyTime} minutes total
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
-
-        {/* Weekly Goal Progress */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="mb-8"
-        >
-          <Card className={currentTheme.styles.cardClass} style={{ borderColor: currentTheme.colors.border }}>
-            <CardHeader>
-              <CardTitle className="flex items-center" style={{ color: currentTheme.colors.text }}>
-                <Target className="h-5 w-5 mr-2" style={{ color: currentTheme.colors.accent }} />
-                Weekly Goal Progress
-              </CardTitle>
-              <CardDescription style={{ color: currentTheme.colors.textSecondary }}>
-                Your learning goal for this week
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">XP Progress</span>
-                  <span className="text-sm text-muted-foreground">
-                    {progressData.studyStats.weeklyProgress} / {progressData.studyStats.weeklyGoal} XP
-                  </span>
-                </div>
-                <Progress 
-                  value={(progressData.studyStats.weeklyProgress / progressData.studyStats.weeklyGoal) * 100} 
-                  className="h-3"
-                />
-                <div className="flex items-center justify-between text-xs text-muted-foreground">
-                  <span>
-                    {Math.round((progressData.studyStats.weeklyProgress / progressData.studyStats.weeklyGoal) * 100)}% complete
-                  </span>
-                  <span>
-                    {progressData.studyStats.weeklyGoal - progressData.studyStats.weeklyProgress} XP remaining
-                  </span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
-
-        {/* Achievements */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="mb-8"
-        >
-          <Card className={currentTheme.styles.cardClass} style={{ borderColor: currentTheme.colors.border }}>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle className="flex items-center" style={{ color: currentTheme.colors.text }}>
-                    <Trophy className="h-5 w-5 mr-2 text-yellow-500" />
-                    Achievements
-                  </CardTitle>
-                  <CardDescription style={{ color: currentTheme.colors.textSecondary }}>
-                    {earnedAchievements.length} of {progressData.achievements.length} achievements unlocked
-                  </CardDescription>
-                </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setShowAllAchievements(!showAllAchievements)}
-                  style={{ 
-                    borderColor: currentTheme.colors.border,
-                    color: currentTheme.colors.text 
-                  }}
-                >
-                  {showAllAchievements ? 'Show Earned Only' : 'Show All'}
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {(showAllAchievements ? progressData.achievements : earnedAchievements).map((achievement) => (
-                  <motion.div
-                    key={achievement.id}
-                    whileHover={{ scale: 1.02 }}
-                    className={`p-4 rounded-lg border transition-all ${
-                      achievement.earned 
-                        ? 'border-cyber-green bg-cyber-green/5' 
-                        : 'border-border bg-muted/5 opacity-60'
-                    }`}
-                  >
-                    <div className="flex items-start space-x-3">
-                      <div className={`p-2 rounded-full ${getRarityColor(achievement.rarity)}/10`}>
-                        <span className="text-2xl">{achievement.icon}</span>
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center space-x-2 mb-1">
-                          <h4 className="font-medium text-foreground">{achievement.title}</h4>
-                          <Badge className={`text-xs ${getRarityColor(achievement.rarity)} text-white`}>
-                            {achievement.rarity}
-                          </Badge>
-                        </div>
-                        <p className="text-sm text-muted-foreground mb-2">
-                          {achievement.description}
-                        </p>
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs font-medium text-cyber-green">
-                            +{achievement.points} XP
-                          </span>
-                          {achievement.earned && achievement.earnedDate && (
-                            <span className="text-xs text-muted-foreground">
-                              {new Date(achievement.earnedDate).toLocaleDateString()}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
-
-        {/* Course Progress */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-          className="mb-8"
-        >
-          <Card className={currentTheme.styles.cardClass} style={{ borderColor: currentTheme.colors.border }}>
-            <CardHeader>
-              <CardTitle className="flex items-center" style={{ color: currentTheme.colors.text }}>
-                <BookOpen className="h-5 w-5 mr-2 text-primary" />
-                Course Progress
-              </CardTitle>
-              <CardDescription style={{ color: currentTheme.colors.textSecondary }}>
-                Your progress across all enrolled courses
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {progressData.courseProgress.map((course) => (
-                  <div key={course.id} className="flex items-center space-x-4 p-4 rounded-lg border border-border">
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between mb-2">
-                        <h4 className="font-medium text-foreground">{course.title}</h4>
-                        <div className="flex items-center space-x-2">
-                          <Badge variant="outline">{course.category}</Badge>
-                          <span className={`text-sm font-medium ${getStatusColor(course.status)}`}>
-                            {course.status.replace('-', ' ')}
-                          </span>
-                        </div>
-                      </div>
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between text-sm">
-                          <span>Progress</span>
-                          <span className="font-medium">{course.progress}%</span>
-                        </div>
-                        <Progress value={course.progress} className="h-2" />
-                        <div className="flex items-center justify-between text-xs text-muted-foreground">
-                          <span>Time spent: {Math.round(course.timeSpent / 60)}h {course.timeSpent % 60}m</span>
-                          <span>Last activity: {course.lastActivity}</span>
-                        </div>
-                      </div>
-                    </div>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => router.push(`/student/courses/${course.id}`)}
-                      style={{ 
-                        borderColor: currentTheme.colors.border,
-                        color: currentTheme.colors.text 
-                      }}
-                    >
-                      <Eye className="h-4 w-4 mr-2" />
-                      View
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
-
-        {/* Skill Progress */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
-          className="mb-8"
-        >
-          <Card className={currentTheme.styles.cardClass} style={{ borderColor: currentTheme.colors.border }}>
-            <CardHeader>
-              <CardTitle className="flex items-center" style={{ color: currentTheme.colors.text }}>
-                <Brain className="h-5 w-5 mr-2 text-cyber-purple" />
-                Skill Development
-              </CardTitle>
-              <CardDescription style={{ color: currentTheme.colors.textSecondary }}>
-                Your mastery level in different cybersecurity skills
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {progressData.skillProgress.map((skill) => (
-                  <div key={skill.skill} className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <h4 className="font-medium text-foreground">{skill.skill}</h4>
-                      <Badge variant="secondary">Level {skill.level}</Badge>
-                    </div>
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between text-sm">
-                        <span>XP Progress</span>
-                        <span className="font-medium">{skill.xp} / {skill.maxXP}</span>
-                      </div>
-                      <Progress value={(skill.xp / skill.maxXP) * 100} className="h-2" />
-                    </div>
-                    <div className="text-xs text-muted-foreground">
-                      <div>Courses: {skill.courses.join(', ')}</div>
-                      <div>Last practiced: {skill.lastPracticed}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
-
-        {/* Weekly Statistics */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.6 }}
-          className="mb-8"
-        >
-          <Card className={currentTheme.styles.cardClass} style={{ borderColor: currentTheme.colors.border }}>
-            <CardHeader>
-              <CardTitle className="flex items-center" style={{ color: currentTheme.colors.text }}>
-                <BarChart3 className="h-5 w-5 mr-2 text-cyber-blue" />
-                Learning Activity
-              </CardTitle>
-              <CardDescription style={{ color: currentTheme.colors.textSecondary }}>
-                Your weekly learning statistics
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-cyber-green">
-                    {progressData.studyStats.totalStudyTime}
-                  </div>
-                  <div className="text-sm text-muted-foreground">Total Minutes</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-cyber-blue">
-                    {progressData.studyStats.averageSessionTime}
-                  </div>
-                  <div className="text-sm text-muted-foreground">Avg Session (min)</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-cyber-purple">
-                    {progressData.studyStats.favoriteCategory}
-                  </div>
-                  <div className="text-sm text-muted-foreground">Favorite Topic</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-orange-500">
-                    {progressData.studyStats.strongestSkill}
-                  </div>
-                  <div className="text-sm text-muted-foreground">Strongest Skill</div>
-                </div>
-              </div>
-
-              {/* Weekly Progress Chart */}
-              <div className="space-y-4">
-                <h4 className="font-medium">Weekly XP Progress</h4>
+        {/* Stats Overview */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+          >
+            <Card className="bg-gradient-to-br from-blue-500 to-cyan-500 text-white">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-medium opacity-90">Current Level</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold mb-2">{progressData.level}</div>
                 <div className="space-y-2">
-                  {progressData.weeklyProgress.map((week) => (
-                    <div key={week.week} className="flex items-center space-x-4">
-                      <div className="w-16 text-sm text-muted-foreground">{week.week}</div>
-                      <div className="flex-1">
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="text-sm font-medium">{week.xp} XP</span>
-                          <span className="text-xs text-muted-foreground">
-                            {Math.round(week.timeSpent / 60)}h {week.timeSpent % 60}m
-                          </span>
+                  <div className="flex justify-between text-sm opacity-90">
+                    <span>Progress</span>
+                    <span>{levelProgress.toFixed(0)}%</span>
+                  </div>
+                  <Progress value={levelProgress} className="h-2 bg-white/20" />
+                  <p className="text-xs opacity-80">{progressData.xpToNextLevel} XP to next level</p>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+          >
+            <Card className="bg-gradient-to-br from-purple-500 to-pink-500 text-white">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-medium opacity-90">Total XP</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold mb-2">{progressData.totalXP.toLocaleString()}</div>
+                <div className="flex items-center gap-2">
+                  <Sparkles className="h-4 w-4 opacity-80" />
+                  <span className="text-sm opacity-90">Experience Points</span>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+          >
+            <Card className="bg-gradient-to-br from-green-500 to-emerald-500 text-white">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-medium opacity-90">Study Streak</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold mb-2">{progressData.streak}</div>
+                <div className="flex items-center gap-2">
+                  <Flame className="h-4 w-4 opacity-80" />
+                  <span className="text-sm opacity-90">Days in a row</span>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+          >
+            <Card className="bg-gradient-to-br from-orange-500 to-red-500 text-white">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-medium opacity-90">Achievements</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold mb-2">{earnedAchievements.length}/{totalAchievements}</div>
+                <div className="flex items-center gap-2">
+                  <Trophy className="h-4 w-4 opacity-80" />
+                  <span className="text-sm opacity-90">Unlocked</span>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        </div>
+
+        {/* Achievement Filters */}
+        <div className="mb-8">
+          <div className="flex flex-wrap gap-2">
+            {[
+              { key: 'all', label: 'All Achievements', count: totalAchievements },
+              { key: 'earned', label: 'Earned', count: earnedAchievements.length },
+              { key: 'available', label: 'Available', count: totalAchievements - earnedAchievements.length },
+              { key: 'legendary', label: 'Legendary', count: progressData.achievements.filter(a => a.rarity === 'legendary').length },
+              { key: 'epic', label: 'Epic', count: progressData.achievements.filter(a => a.rarity === 'epic').length },
+              { key: 'rare', label: 'Rare', count: progressData.achievements.filter(a => a.rarity === 'rare').length },
+              { key: 'common', label: 'Common', count: progressData.achievements.filter(a => a.rarity === 'common').length }
+            ].map((filter) => (
+              <Button
+                key={filter.key}
+                variant={showAchievements === filter.key ? 'default' : 'outline'}
+                onClick={() => setShowAchievements(filter.key as any)}
+                className={`${showAchievements === filter.key ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'border-gray-600 text-gray-300 hover:bg-gray-700 hover:text-white'}`}
+                size="sm"
+              >
+                {filter.label} ({filter.count})
+              </Button>
+            ))}
+          </div>
+        </div>
+
+        {/* Achievements Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+          {filteredAchievements.map((achievement, index) => (
+            <motion.div
+              key={achievement.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.1 }}
+              className={`group cursor-pointer ${getRarityGlow(achievement.rarity)}`}
+              onClick={() => setSelectedAchievement(achievement)}
+            >
+              <Card className={`transition-all hover:shadow-lg ${
+                achievement.earned 
+                  ? 'bg-gradient-to-br from-gray-800/50 to-gray-900/50 backdrop-blur-sm border-gray-700/50 hover:border-gray-600/50' 
+                  : 'bg-gradient-to-br from-gray-800/30 to-gray-900/30 backdrop-blur-sm border-gray-700/30 hover:border-gray-600/30'
+              }`}>
+                <CardContent className="p-6">
+                  <div className="flex items-start gap-4">
+                    <div className={`
+                      w-16 h-16 rounded-xl flex items-center justify-center transition-all group-hover:scale-110
+                      ${achievement.earned 
+                        ? 'bg-gradient-to-br from-blue-500 to-cyan-500' 
+                        : 'bg-gray-600/50'
+                      }
+                    `}>
+                      {achievement.earned ? (
+                        <achievement.icon className="h-8 w-8 text-white" />
+                      ) : (
+                        <Lock className="h-8 w-8 text-gray-400" />
+                      )}
+                    </div>
+                    
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-2">
+                        <h3 className={`font-bold text-lg ${
+                          achievement.earned ? 'text-white' : 'text-gray-400'
+                        }`}>
+                          {achievement.title}
+                        </h3>
+                      </div>
+                      
+                      <Badge className={`${getRarityColor(achievement.rarity)} mb-2 capitalize`}>
+                        {achievement.rarity}
+                      </Badge>
+                      
+                      <p className={`text-sm mb-3 ${
+                        achievement.earned ? 'text-gray-300' : 'text-gray-400'
+                      }`}>
+                        {achievement.description}
+                      </p>
+                      
+                      {achievement.progress !== undefined && !achievement.earned && (
+                        <div className="mb-3">
+                          <div className="flex justify-between text-xs text-gray-400 mb-1">
+                            <span>Progress</span>
+                            <span>{achievement.progress}/{achievement.maxProgress}</span>
+                          </div>
+                          <Progress 
+                            value={(achievement.progress / achievement.maxProgress!) * 100} 
+                            className="h-1.5 bg-gray-700" 
+                          />
                         </div>
-                        <Progress value={(week.xp / 700) * 100} className="h-2" />
+                      )}
+                      
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium text-purple-400">
+                          +{achievement.points} XP
+                        </span>
+                        {achievement.earned && achievement.earnedDate && (
+                          <span className="text-xs text-gray-500">
+                            {new Date(achievement.earnedDate).toLocaleDateString()}
+                          </span>
+                        )}
                       </div>
                     </div>
-                  ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          ))}
+        </div>
+
+        {/* Study Statistics */}
+        <Card className="bg-gradient-to-br from-gray-800/50 to-gray-900/50 backdrop-blur-sm border-gray-700/50 mb-8">
+          <CardHeader>
+            <CardTitle className="text-white flex items-center gap-2">
+              <BarChart3 className="h-5 w-5 text-blue-400" />
+              Study Statistics
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+              <div className="text-center">
+                <div className="text-2xl font-bold text-white mb-1">
+                  {Math.floor(progressData.studyStats.totalStudyTime / 60)}h {progressData.studyStats.totalStudyTime % 60}m
                 </div>
+                <div className="text-sm text-gray-400">Total Study Time</div>
               </div>
-            </CardContent>
-          </Card>
-        </motion.div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-white mb-1">{progressData.studyStats.accuracy}%</div>
+                <div className="text-sm text-gray-400">Quiz Accuracy</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-white mb-1">{progressData.studyStats.perfectScores}</div>
+                <div className="text-sm text-gray-400">Perfect Scores</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-white mb-1">#{progressData.studyStats.rank}</div>
+                <div className="text-sm text-gray-400">Global Rank</div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </main>
+
+      {/* Achievement Detail Modal */}
+      <AnimatePresence>
+        {selectedAchievement && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            onClick={() => setSelectedAchievement(null)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-700 rounded-2xl p-8 max-w-md w-full shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="text-center mb-6">
+                <div className={`
+                  w-20 h-20 rounded-2xl mx-auto mb-4 flex items-center justify-center
+                  ${selectedAchievement.earned 
+                    ? 'bg-gradient-to-br from-blue-500 to-cyan-500' 
+                    : 'bg-gray-600/50'
+                  }
+                `}>
+                  {selectedAchievement.earned ? (
+                    <selectedAchievement.icon className="h-10 w-10 text-white" />
+                  ) : (
+                    <Lock className="h-10 w-10 text-gray-400" />
+                  )}
+                </div>
+                
+                <Badge className={`${getRarityColor(selectedAchievement.rarity)} mb-3 capitalize`}>
+                  {selectedAchievement.rarity}
+                </Badge>
+                
+                <h2 className="text-2xl font-bold text-white mb-2">
+                  {selectedAchievement.title}
+                </h2>
+                
+                <p className="text-gray-300 mb-4">
+                  {selectedAchievement.longDescription}
+                </p>
+                
+                {selectedAchievement.requirements && (
+                  <div className="bg-gray-800/50 rounded-lg p-4 mb-4 border border-gray-700/50">
+                    <h3 className="font-semibold text-white mb-2">Requirements:</h3>
+                    <p className="text-sm text-gray-400">{selectedAchievement.requirements}</p>
+                  </div>
+                )}
+                
+                {selectedAchievement.progress !== undefined && !selectedAchievement.earned && (
+                  <div className="mb-4">
+                    <div className="flex justify-between text-sm text-gray-400 mb-2">
+                      <span>Progress</span>
+                      <span>{selectedAchievement.progress}/{selectedAchievement.maxProgress}</span>
+                    </div>
+                    <Progress 
+                      value={(selectedAchievement.progress / selectedAchievement.maxProgress!) * 100} 
+                      className="h-2 bg-gray-700" 
+                    />
+                  </div>
+                )}
+                
+                <div className="text-lg font-bold text-purple-400 mb-4">
+                  Reward: +{selectedAchievement.points} XP
+                </div>
+                
+                {selectedAchievement.earned && selectedAchievement.earnedDate && (
+                  <p className="text-sm text-gray-500">
+                    Earned on {new Date(selectedAchievement.earnedDate).toLocaleDateString()}
+                  </p>
+                )}
+              </div>
+              
+              <Button 
+                onClick={() => setSelectedAchievement(null)}
+                className="w-full bg-blue-600 hover:bg-blue-700"
+              >
+                Close
+              </Button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
-}
+} 

@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { Toaster } from 'react-hot-toast';
 import { ThemeProvider } from '@/contexts/ThemeContext';
+import { ShopEffectsProvider } from '@/contexts/ShopEffectsContext';
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -17,10 +18,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="dark">
-      <body className={`${inter.className} bg-background text-foreground`}>
+    <html lang="en">
+      <body className={`${inter.className} transition-colors duration-300`}>
         <ThemeProvider>
-        {children}
+          <ShopEffectsProvider>
+            {children}
+          </ShopEffectsProvider>
         <Toaster
           position="top-right"
           toastOptions={{

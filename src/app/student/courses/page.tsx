@@ -2,86 +2,274 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { 
-  BookOpen, Search, Filter, Star, Clock, Users, Award,
-  ChevronLeft, ChevronRight, Play, PlayCircle, CheckCircle, Lock,
-  Target, TrendingUp, Zap, Shield, Brain, Code,
-  Globe, Smartphone, Database, Cpu, Monitor, Key
+  BookOpen, Clock, ChevronRight, Filter,
+  Search, CheckCircle, Lock, BarChart, Play,
+  Users, Star, Shield, Monitor, Video
 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import { Badge } from '@/components/ui/badge';
 import Navbar from '@/components/shared/Navbar';
-import { StudentProfile, Course } from '@/lib/types';
+import { StudentProfile } from '@/lib/types';
 import { demoStudent } from '@/lib/demo-data';
-import { toast } from 'react-hot-toast';
-import { useTheme } from '@/contexts/ThemeContext';
 
-interface DetailedCourse {
+interface Unit {
   id: string;
   title: string;
   description: string;
-  gradeLevel: string;
-  category: string;
+  duration: string;
   progress: number;
-  instructor: string;
-  duration: string;
-  students: number;
-  rating: number;
-  reviews: number;
-  prerequisites: string[];
-  modules: CourseModule[];
-  skills: string[];
-  certificate: boolean;
-  featured: boolean;
-  price: 'free' | 'premium';
-}
-
-interface CourseModule {
-  id: string;
-  title: string;
   lessons: number;
-  duration: string;
   completed: boolean;
 }
 
+interface GradeBook {
+  id: string;
+  grade: string;
+  bookTitle: string;
+  description: string;
+  totalUnits: number;
+  completedUnits: number;
+  progress: number;
+  estimatedTime: string;
+  instructor: string;
+  enrolled: boolean;
+  units: Unit[];
+  coverColor: string;
+}
+
+const GRADE_BOOKS: GradeBook[] = [
+  {
+    id: 'grade-6-cyber-basics',
+    grade: '6',
+    bookTitle: 'Drew Weizman',
+    description: 'Learn the essential basics of staying safe in the digital world. Perfect introduction to cybersecurity concepts for middle school students.',
+    totalUnits: 8,
+    completedUnits: 3,
+    progress: 38,
+    estimatedTime: '12 weeks',
+    instructor: 'Ms. Sarah Johnson',
+    enrolled: true,
+    coverColor: 'from-blue-500 to-cyan-500',
+    units: [
+      {
+        id: 'unit-1',
+        title: 'Introduction to Digital Safety',
+        description: 'Understanding what cybersecurity means and why it matters in our daily lives.',
+        duration: '2 weeks',
+        progress: 100,
+        lessons: 6,
+        completed: true
+      },
+      {
+        id: 'unit-2',
+        title: 'Password Protection',
+        description: 'Creating strong passwords and keeping your accounts secure.',
+        duration: '1.5 weeks',
+        progress: 100,
+        lessons: 5,
+        completed: true
+      },
+      {
+        id: 'unit-3',
+        title: 'Safe Internet Browsing',
+        description: 'How to identify safe websites and avoid dangerous downloads.',
+        duration: '2 weeks',
+        progress: 75,
+        lessons: 7,
+        completed: false
+      },
+      {
+        id: 'unit-4',
+        title: 'Email and Message Safety',
+        description: 'Recognizing suspicious emails and messages from strangers.',
+        duration: '1.5 weeks',
+        progress: 0,
+        lessons: 5,
+        completed: false
+      },
+      {
+        id: 'unit-5',
+        title: 'Social Media Privacy',
+        description: 'Protecting your personal information on social platforms.',
+        duration: '2 weeks',
+        progress: 0,
+        lessons: 6,
+        completed: false
+      },
+      {
+        id: 'unit-6',
+        title: 'Digital Citizenship',
+        description: 'Being a responsible and respectful digital citizen online.',
+        duration: '1.5 weeks',
+        progress: 0,
+        lessons: 4,
+        completed: false
+      },
+      {
+        id: 'unit-7',
+        title: 'Cyberbullying Prevention',
+        description: 'Understanding cyberbullying and how to respond to it properly.',
+        duration: '1 week',
+        progress: 0,
+        lessons: 4,
+        completed: false
+      },
+      {
+        id: 'unit-8',
+        title: 'Digital Footprint Awareness',
+        description: 'Learning about your digital footprint and its long-term impact.',
+        duration: '1 week',
+        progress: 0,
+        lessons: 3,
+        completed: false
+      }
+    ]
+  },
+  {
+    id: 'grade-12-advanced-cyber',
+    grade: '12',
+    bookTitle: 'Advanced Cybersecurity Principles',
+    description: 'Comprehensive cybersecurity education covering ethical hacking, network security, and career preparation for college and beyond.',
+    totalUnits: 12,
+    completedUnits: 7,
+    progress: 58,
+    estimatedTime: '18 weeks',
+    instructor: 'Dr. Michael Chen',
+    enrolled: true,
+    coverColor: 'from-purple-600 to-pink-600',
+    units: [
+      {
+        id: 'unit-1',
+        title: 'Network Security Fundamentals',
+        description: 'Understanding network architecture, protocols, and security measures.',
+        duration: '2 weeks',
+        progress: 100,
+        lessons: 8,
+        completed: true
+      },
+      {
+        id: 'unit-2',
+        title: 'Cryptography and Encryption',
+        description: 'Mathematical foundations of encryption and modern cryptographic systems.',
+        duration: '2.5 weeks',
+        progress: 100,
+        lessons: 10,
+        completed: true
+      },
+      {
+        id: 'unit-3',
+        title: 'Ethical Hacking Principles',
+        description: 'Introduction to penetration testing and ethical hacking methodologies.',
+        duration: '3 weeks',
+        progress: 100,
+        lessons: 12,
+        completed: true
+      },
+      {
+        id: 'unit-4',
+        title: 'Web Application Security',
+        description: 'Securing web applications and understanding common vulnerabilities.',
+        duration: '2 weeks',
+        progress: 100,
+        lessons: 9,
+        completed: true
+      },
+      {
+        id: 'unit-5',
+        title: 'Digital Forensics',
+        description: 'Investigating cybercrime and analyzing digital evidence.',
+        duration: '2.5 weeks',
+        progress: 100,
+        lessons: 10,
+        completed: true
+      },
+      {
+        id: 'unit-6',
+        title: 'Risk Assessment and Management',
+        description: 'Evaluating and managing cybersecurity risks in organizations.',
+        duration: '2 weeks',
+        progress: 100,
+        lessons: 8,
+        completed: true
+      },
+      {
+        id: 'unit-7',
+        title: 'Incident Response',
+        description: 'Developing and executing incident response plans and procedures.',
+        duration: '1.5 weeks',
+        progress: 85,
+        lessons: 7,
+        completed: false
+      },
+      {
+        id: 'unit-8',
+        title: 'Cloud Security',
+        description: 'Understanding security challenges and solutions in cloud computing.',
+        duration: '2 weeks',
+        progress: 0,
+        lessons: 9,
+        completed: false
+      },
+      {
+        id: 'unit-9',
+        title: 'Mobile Device Security',
+        description: 'Securing smartphones, tablets, and IoT devices.',
+        duration: '1.5 weeks',
+        progress: 0,
+        lessons: 6,
+        completed: false
+      },
+      {
+        id: 'unit-10',
+        title: 'Compliance and Regulations',
+        description: 'Understanding cybersecurity laws, regulations, and compliance requirements.',
+        duration: '1.5 weeks',
+        progress: 0,
+        lessons: 6,
+        completed: false
+      },
+      {
+        id: 'unit-11',
+        title: 'Career Preparation',
+        description: 'Cybersecurity career paths, certifications, and industry preparation.',
+        duration: '1 week',
+        progress: 0,
+        lessons: 5,
+        completed: false
+      },
+      {
+        id: 'unit-12',
+        title: 'Capstone Project',
+        description: 'Complete a comprehensive cybersecurity project demonstrating learned skills.',
+        duration: '2 weeks',
+        progress: 0,
+        lessons: 4,
+        completed: false
+      }
+    ]
+  }
+];
+
 export default function CoursesPage() {
   const [user, setUser] = useState<StudentProfile | null>(null);
-  const [courses, setCourses] = useState<DetailedCourse[]>([]);
-  const [filteredCourses, setFilteredCourses] = useState<DetailedCourse[]>([]);
   const [selectedGrade, setSelectedGrade] = useState<string>('all');
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCourse, setSelectedCourse] = useState<DetailedCourse | null>(null);
-  const [enrolledCourses, setEnrolledCourses] = useState<string[]>([]);
-  const { currentTheme } = useTheme();
+  const [selectedBook, setSelectedBook] = useState<GradeBook | null>(null);
+  const [showUnits, setShowUnits] = useState(false);
   const router = useRouter();
-
-  const grades = ['all', 'elementary', 'middle', 'high', 'college'];
-  const categories = ['all', 'fundamentals', 'network', 'cryptography', 'ethics', 'malware', 'forensics'];
-
-  const courseIcons = {
-    fundamentals: Shield,
-    network: Globe,
-    cryptography: Key,
-    ethics: Award,
-    malware: Target,
-    forensics: Search,
-    default: BookOpen
-  };
 
   useEffect(() => {
     const currentUser = localStorage.getItem('currentUser');
     if (currentUser) {
-      const userData = JSON.parse(currentUser);
-      if (userData.role === 'student') {
-        setUser(demoStudent);
-        loadCourses();
-        loadEnrolledCourses();
-      } else {
+        const userData = JSON.parse(currentUser);
+        if (userData.role === 'student') {
+          setUser(demoStudent);
+        } else {
         router.push('/auth/login');
       }
     } else {
@@ -89,738 +277,322 @@ export default function CoursesPage() {
     }
   }, [router]);
 
-  const loadCourses = () => {
-    const courseData: DetailedCourse[] = [
-      {
-        id: 'cyber-101',
-        title: 'Cybersecurity Fundamentals',
-        description: 'Learn the basics of cybersecurity, from threats to defenses',
-        gradeLevel: 'elementary',
-        category: 'fundamentals',
-        progress: 0,
-        instructor: 'Dr. Sarah Chen',
-        duration: '4 weeks',
-        students: 1245,
-        rating: 4.8,
-        reviews: 234,
-        prerequisites: [],
-        skills: ['Password Security', 'Safe Browsing', 'Email Security', 'Digital Citizenship'],
-        certificate: true,
-        featured: true,
-        price: 'free',
-        modules: [
-          { id: 'm1', title: 'Introduction to Cybersecurity', lessons: 5, duration: '45 min', completed: false },
-          { id: 'm2', title: 'Common Cyber Threats', lessons: 6, duration: '60 min', completed: false },
-          { id: 'm3', title: 'Personal Digital Security', lessons: 4, duration: '30 min', completed: false },
-          { id: 'm4', title: 'Best Practices & Prevention', lessons: 7, duration: '90 min', completed: false }
-        ]
-      },
-      {
-        id: 'network-security',
-        title: 'Network Security Essentials',
-        description: 'Understand network protocols, firewalls, and network-based attacks',
-        gradeLevel: 'high',
-        category: 'network',
-        progress: 0,
-        instructor: 'Prof. Michael Torres',
-        duration: '6 weeks',
-        students: 892,
-        rating: 4.7,
-        reviews: 156,
-        prerequisites: ['Cybersecurity Fundamentals'],
-        skills: ['Network Protocols', 'Firewall Management', 'VPN Configuration', 'Network Monitoring'],
-        certificate: true,
-        featured: true,
-        price: 'premium',
-        modules: [
-          { id: 'm1', title: 'Network Fundamentals', lessons: 8, duration: '120 min', completed: false },
-          { id: 'm2', title: 'Network Threats & Attacks', lessons: 10, duration: '150 min', completed: false },
-          { id: 'm3', title: 'Firewalls & Intrusion Detection', lessons: 9, duration: '135 min', completed: false },
-          { id: 'm4', title: 'Wireless Security', lessons: 6, duration: '90 min', completed: false },
-          { id: 'm5', title: 'Network Monitoring & Analysis', lessons: 7, duration: '105 min', completed: false }
-        ]
-      },
-      {
-        id: 'cryptography-basics',
-        title: 'Introduction to Cryptography',
-        description: 'Explore encryption, hashing, and digital signatures',
-        gradeLevel: 'college',
-        category: 'cryptography',
-        progress: 0,
-        instructor: 'Dr. Lisa Wang',
-        duration: '8 weeks',
-        students: 567,
-        rating: 4.9,
-        reviews: 89,
-        prerequisites: ['Network Security Essentials'],
-        skills: ['Symmetric Encryption', 'Public Key Cryptography', 'Hash Functions', 'Digital Signatures'],
-        certificate: true,
-        featured: false,
-        price: 'premium',
-        modules: [
-          { id: 'm1', title: 'Cryptography History & Basics', lessons: 6, duration: '90 min', completed: false },
-          { id: 'm2', title: 'Symmetric Cryptography', lessons: 8, duration: '120 min', completed: false },
-          { id: 'm3', title: 'Asymmetric Cryptography', lessons: 10, duration: '150 min', completed: false },
-          { id: 'm4', title: 'Hash Functions & MACs', lessons: 7, duration: '105 min', completed: false },
-          { id: 'm5', title: 'Digital Signatures & PKI', lessons: 9, duration: '135 min', completed: false },
-          { id: 'm6', title: 'Modern Cryptographic Applications', lessons: 5, duration: '75 min', completed: false }
-        ]
-      },
-      {
-        id: 'cyber-ethics',
-        title: 'Cybersecurity Ethics & Law',
-        description: 'Understand the legal and ethical aspects of cybersecurity',
-        gradeLevel: 'middle',
-        category: 'ethics',
-        progress: 0,
-        instructor: 'Prof. David Kim',
-        duration: '3 weeks',
-        students: 234,
-        rating: 4.6,
-        reviews: 45,
-        prerequisites: [],
-        skills: ['Cyber Law', 'Digital Rights', 'Privacy Protection', 'Ethical Hacking'],
-        certificate: true,
-        featured: false,
-        price: 'free',
-        modules: [
-          { id: 'm1', title: 'Cybersecurity Law Overview', lessons: 4, duration: '60 min', completed: false },
-          { id: 'm2', title: 'Privacy & Data Protection', lessons: 5, duration: '75 min', completed: false },
-          { id: 'm3', title: 'Ethical Hacking Guidelines', lessons: 6, duration: '90 min', completed: false }
-        ]
-      },
-      {
-        id: 'malware-analysis',
-        title: 'Malware Analysis & Defense',
-        description: 'Learn to identify, analyze, and defend against malicious software',
-        gradeLevel: 'college',
-        category: 'malware',
-        progress: 0,
-        instructor: 'Dr. Jennifer Liu',
-        duration: '10 weeks',
-        students: 345,
-        rating: 4.8,
-        reviews: 67,
-        prerequisites: ['Network Security Essentials', 'Cybersecurity Fundamentals'],
-        skills: ['Malware Detection', 'Static Analysis', 'Dynamic Analysis', 'Reverse Engineering'],
-        certificate: true,
-        featured: true,
-        price: 'premium',
-        modules: [
-          { id: 'm1', title: 'Malware Types & Classification', lessons: 7, duration: '105 min', completed: false },
-          { id: 'm2', title: 'Static Analysis Techniques', lessons: 9, duration: '135 min', completed: false },
-          { id: 'm3', title: 'Dynamic Analysis & Sandboxing', lessons: 8, duration: '120 min', completed: false },
-          { id: 'm4', title: 'Reverse Engineering Basics', lessons: 12, duration: '180 min', completed: false },
-          { id: 'm5', title: 'Advanced Persistent Threats', lessons: 6, duration: '90 min', completed: false },
-          { id: 'm6', title: 'Malware Defense Strategies', lessons: 8, duration: '120 min', completed: false }
-        ]
-      },
-      {
-        id: 'digital-forensics',
-        title: 'Digital Forensics Investigation',
-        description: 'Master the art of digital evidence collection and analysis',
-        gradeLevel: 'college',
-        category: 'forensics',
-        progress: 0,
-        instructor: 'Det. Mark Johnson',
-        duration: '12 weeks',
-        students: 178,
-        rating: 4.9,
-        reviews: 23,
-        prerequisites: ['Malware Analysis & Defense'],
-        skills: ['Evidence Collection', 'Disk Imaging', 'Network Forensics', 'Mobile Forensics'],
-        certificate: true,
-        featured: false,
-        price: 'premium',
-        modules: [
-          { id: 'm1', title: 'Forensics Fundamentals', lessons: 5, duration: '75 min', completed: false },
-          { id: 'm2', title: 'Digital Evidence Handling', lessons: 8, duration: '120 min', completed: false },
-          { id: 'm3', title: 'Disk & File System Analysis', lessons: 10, duration: '150 min', completed: false },
-          { id: 'm4', title: 'Network Traffic Analysis', lessons: 9, duration: '135 min', completed: false },
-          { id: 'm5', title: 'Mobile Device Forensics', lessons: 7, duration: '105 min', completed: false },
-          { id: 'm6', title: 'Report Writing & Testimony', lessons: 6, duration: '90 min', completed: false }
-        ]
-      }
-    ];
-
-    setCourses(courseData);
-    setFilteredCourses(courseData);
+  const handleBookClick = (book: GradeBook) => {
+    setSelectedBook(book);
+    setShowUnits(true);
   };
 
-  const loadEnrolledCourses = () => {
-    const enrolled = localStorage.getItem('enrolledCourses');
-    if (enrolled) {
-      setEnrolledCourses(JSON.parse(enrolled));
-    }
+  const handleUnitClick = (unit: Unit) => {
+    // Navigate to the existing course watching format
+    router.push(`/student/courses/${selectedBook?.id}?unit=${unit.id}`);
   };
 
-  useEffect(() => {
-    let filtered = courses;
-
-    if (selectedGrade !== 'all') {
-      filtered = filtered.filter(course => course.gradeLevel === selectedGrade);
-    }
-
-    if (selectedCategory !== 'all') {
-      filtered = filtered.filter(course => course.category === selectedCategory);
-    }
-
-    if (searchQuery) {
-      filtered = filtered.filter(course =>
-        course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        course.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        course.skills.some(skill => skill.toLowerCase().includes(searchQuery.toLowerCase()))
-      );
-    }
-
-    setFilteredCourses(filtered);
-  }, [courses, selectedGrade, selectedCategory, searchQuery]);
-
-  const enrollInCourse = (courseId: string) => {
-    const newEnrolled = [...enrolledCourses, courseId];
-    setEnrolledCourses(newEnrolled);
-    localStorage.setItem('enrolledCourses', JSON.stringify(newEnrolled));
-    toast.success('Successfully enrolled in course! 🎉');
-  };
-
-  const startCourse = (course: DetailedCourse) => {
-    // Navigate to the video player page
-    toast.success(`Starting ${course.title}! Good luck! 📚`);
-    router.push(`/student/courses/${course.id}`);
-  };
-
-  const isEnrolled = (courseId: string) => enrolledCourses.includes(courseId);
-
-  const canEnroll = (course: DetailedCourse) => {
-    if (course.prerequisites.length === 0) return true;
-    return course.prerequisites.every(prereq => 
-      enrolledCourses.some(id => courses.find(c => c.id === id)?.title === prereq)
-    );
-  };
-
-  const getCategoryIcon = (category: string) => {
-    switch (category) {
-      case 'fundamentals': return Shield;
-      case 'network': return Globe;
-      case 'cryptography': return Key;
-      case 'ethics': return Award;
-      case 'malware': return Target;
-      case 'forensics': return Search;
-      default: return BookOpen;
-    }
-  };
+  const filteredBooks = GRADE_BOOKS.filter(book => {
+    const matchesGrade = selectedGrade === 'all' || book.grade === selectedGrade;
+    const matchesSearch = book.bookTitle.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         book.description.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesGrade && matchesSearch;
+  });
 
   if (!user) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: currentTheme.colors.background }}>
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 flex items-center justify-center">
         <div className="text-center">
-          <div className="w-8 h-8 border-2 border-t-transparent rounded-full animate-spin mx-auto mb-4" style={{ borderColor: currentTheme.colors.primary }}></div>
-          <p style={{ color: currentTheme.colors.textSecondary }}>Loading courses...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+          <p className="text-blue-400 font-medium">Loading your video library...</p>
         </div>
       </div>
     );
   }
 
+  if (showUnits && selectedBook) {
   return (
-    <div className="min-h-screen" style={{ background: currentTheme.colors.background }}>
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800">
+        <Navbar user={user} />
+      
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          {/* Back Button and Book Header */}
+          <div className="mb-8">
+            <Button
+              onClick={() => setShowUnits(false)}
+              variant="outline"
+              className="mb-6 border-gray-600 text-gray-300 hover:bg-gray-700 hover:text-white"
+            >
+              <ChevronRight className="mr-2 h-4 w-4 rotate-180" />
+              Back to Video Library
+            </Button>
+            
+            <div className="bg-gradient-to-br from-gray-800/50 to-gray-900/50 backdrop-blur-sm border border-gray-700/50 rounded-xl shadow-sm p-8">
+              <div className="flex items-start gap-6">
+                <div className={`w-24 h-32 bg-gradient-to-br ${selectedBook.coverColor} rounded-lg flex items-center justify-center shadow-lg`}>
+                  <BookOpen className="h-12 w-12 text-white" />
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center gap-3 mb-4">
+                    <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30">
+                      Grade {selectedBook.grade}
+                    </Badge>
+                    <Badge className="bg-green-500/20 text-green-400 border-green-500/30">
+                      Enrolled
+                    </Badge>
+                  </div>
+                  
+                  <h1 className="text-3xl font-bold text-white mb-3">
+                    {selectedBook.bookTitle}
+                  </h1>
+                  
+                  <p className="text-gray-300 text-lg mb-6">
+                    {selectedBook.description}
+                  </p>
+                  
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6 text-sm">
+                    <div className="flex items-center gap-2 text-gray-400">
+                      <BookOpen className="h-4 w-4" />
+                      <span>{selectedBook.totalUnits} units</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-gray-400">
+                      <Clock className="h-4 w-4" />
+                      <span>{selectedBook.estimatedTime}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-gray-400">
+                      <Users className="h-4 w-4" />
+                      <span>{selectedBook.instructor}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-gray-400">
+                      <BarChart className="h-4 w-4" />
+                      <span>{selectedBook.progress}% complete</span>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="font-medium text-white">
+                        Progress: {selectedBook.completedUnits}/{selectedBook.totalUnits} units
+                      </span>
+                      <span className="text-gray-400">{selectedBook.progress}%</span>
+                    </div>
+                    <Progress value={selectedBook.progress} className="h-2" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Units Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {selectedBook.units.map((unit, index) => (
+        <motion.div
+                key={unit.id}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1 }}
+              >
+                <Card 
+                  className={`cursor-pointer transition-all hover:shadow-md backdrop-blur-sm ${
+                    unit.completed ? 'bg-green-500/20 border-green-500/30' : 
+                    unit.progress > 0 ? 'bg-blue-500/20 border-blue-500/30' : 
+                    'bg-gray-800/50 border-gray-700/50'
+                  }`}
+                  onClick={() => handleUnitClick(unit)}
+                >
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between">
+                      <Badge variant="outline" className="text-xs border-gray-600 text-gray-300">
+                        Unit {index + 1}
+                      </Badge>
+                      {unit.completed ? (
+                        <CheckCircle className="h-5 w-5 text-green-400" />
+                      ) : unit.progress > 0 ? (
+                        <Play className="h-5 w-5 text-blue-400" />
+                      ) : (
+                        <Lock className="h-5 w-5 text-gray-500" />
+                      )}
+                    </div>
+                    <CardTitle className="text-lg leading-tight text-white">{unit.title}</CardTitle>
+                  </CardHeader>
+                  <CardContent className="pt-0">
+                    <p className="text-gray-300 text-sm mb-4 line-clamp-2">{unit.description}</p>
+                    
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between text-sm text-gray-400">
+                        <span className="flex items-center gap-1">
+                          <Video className="h-4 w-4" />
+                          {unit.lessons} lessons
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Clock className="h-4 w-4" />
+                          {unit.duration}
+                        </span>
+                      </div>
+                      
+                      {unit.progress > 0 && (
+                        <div>
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="text-xs font-medium text-gray-300">Progress</span>
+                            <span className="text-xs text-gray-400">{unit.progress}%</span>
+                          </div>
+                          <Progress value={unit.progress} className="h-1.5" />
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800">
       <Navbar user={user} />
       
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-8"
-        >
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h1 className="text-3xl font-bold text-foreground flex items-center" style={{ color: currentTheme.colors.text }}>
-                <BookOpen className="h-8 w-8 mr-3 text-cyber-green" />
-                Course Catalog
-              </h1>
-              <p className="text-muted-foreground mt-1" style={{ color: currentTheme.colors.textSecondary }}>
-                Discover cybersecurity courses tailored to your grade level
-              </p>
-            </div>
-            <Button 
-              variant="outline"
-              onClick={() => router.push('/student/dashboard')}
-            >
-              <ChevronLeft className="h-4 w-4 mr-2" />
-              Back to Dashboard
-            </Button>
-          </div>
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-white mb-2">Video Library</h1>
+          <p className="text-gray-400">
+            Comprehensive cybersecurity education organized by grade level
+          </p>
+        </div>
 
-          {/* Search & Filters */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="md:col-span-2">
+        {/* Filters */}
+        <div className="mb-8">
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="flex-1">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                 <Input
-                  placeholder="Search courses, skills, or topics..."
+                  placeholder="Search video courses..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10"
-                  style={{ 
-                    backgroundColor: currentTheme.colors.surface,
-                    borderColor: currentTheme.colors.border,
-                    color: currentTheme.colors.text
-                  }}
+                  className="pl-10 bg-gray-800/50 border-gray-600 text-white placeholder-gray-400 focus:border-blue-500 focus:ring-blue-500"
                 />
               </div>
             </div>
-
-            <div>
-              <select
-                value={selectedGrade}
-                onChange={(e) => setSelectedGrade(e.target.value)}
-                className="w-full px-3 py-2 rounded-md border"
-                style={{ 
-                  backgroundColor: currentTheme.colors.surface,
-                  borderColor: currentTheme.colors.border,
-                  color: currentTheme.colors.text
-                }}
+            <div className="flex gap-2">
+              <Button
+                onClick={() => setSelectedGrade('all')}
+                variant={selectedGrade === 'all' ? 'default' : 'outline'}
+                className={selectedGrade === 'all' ? 
+                  'bg-blue-500 hover:bg-blue-600 text-white' : 
+                  'border-gray-600 text-gray-300 hover:bg-gray-700 hover:text-white'}
               >
-                <option value="all">All Grade Levels</option>
-                <option value="elementary">Elementary</option>
-                <option value="middle">Middle School</option>
-                <option value="high">High School</option>
-                <option value="college">College/Adult</option>
-              </select>
-            </div>
-
-            <div>
-              <select
-                value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
-                className="w-full px-3 py-2 rounded-md border"
-                style={{ 
-                  backgroundColor: currentTheme.colors.surface,
-                  borderColor: currentTheme.colors.border,
-                  color: currentTheme.colors.text
-                }}
+                All Grades
+              </Button>
+              <Button
+                onClick={() => setSelectedGrade('6')}
+                variant={selectedGrade === '6' ? 'default' : 'outline'}
+                className={selectedGrade === '6' ? 
+                  'bg-blue-500 hover:bg-blue-600 text-white' : 
+                  'border-gray-600 text-gray-300 hover:bg-gray-700 hover:text-white'}
               >
-                <option value="all">All Categories</option>
-                <option value="fundamentals">Fundamentals</option>
-                <option value="network">Network Security</option>
-                <option value="cryptography">Cryptography</option>
-                <option value="ethics">Ethics & Law</option>
-                <option value="malware">Malware</option>
-                <option value="forensics">Digital Forensics</option>
-              </select>
+                Grade 6
+              </Button>
+              <Button
+                onClick={() => setSelectedGrade('12')}
+                variant={selectedGrade === '12' ? 'default' : 'outline'}
+                className={selectedGrade === '12' ? 
+                  'bg-blue-500 hover:bg-blue-600 text-white' : 
+                  'border-gray-600 text-gray-300 hover:bg-gray-700 hover:text-white'}
+              >
+                Grade 12
+              </Button>
             </div>
           </div>
-        </motion.div>
+        </div>
 
-        {/* Featured Courses */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="mb-8"
-        >
-          <h2 className="text-2xl font-bold mb-4 flex items-center" style={{ color: currentTheme.colors.text }}>
-            <Star className="h-6 w-6 mr-2 text-yellow-500" />
-            Featured Courses
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredCourses.filter(course => course.featured).map((course) => {
-              const Icon = getCategoryIcon(course.category);
-              return (
-                <motion.div
-                  key={course.id}
-                  whileHover={{ scale: 1.02 }}
-                  className="relative"
-                >
-                  <Card className={`${currentTheme.styles.cardClass} border-2 border-cyber-green/30 h-full`} style={{ borderColor: currentTheme.colors.border }}>
-                    <CardHeader>
-                      <div className="flex items-start justify-between">
-                        <div className="flex items-center space-x-3">
-                          <div className="p-2 bg-cyber-green/10 rounded-lg">
-                            <Icon className="h-6 w-6 text-cyber-green" />
-                          </div>
-                          <div>
-                            <Badge className="mb-1 bg-cyber-green text-black">Featured</Badge>
-                            <CardTitle className="text-lg" style={{ color: currentTheme.colors.text }}>{course.title}</CardTitle>
-                          </div>
-                        </div>
-                        <Badge variant={course.price === 'free' ? 'secondary' : 'default'} style={{ borderColor: currentTheme.colors.border, color: currentTheme.colors.text }}>
-                          {course.price === 'free' ? 'Free' : 'Premium'}
-                        </Badge>
-                      </div>
-                      <CardDescription className="line-clamp-2" style={{ color: currentTheme.colors.textSecondary }}>
-                        {course.description}
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent className="flex-1 flex flex-col">
-                      <div className="grid grid-cols-3 gap-4 text-sm text-muted-foreground mb-4">
-                        <div className="flex items-center">
-                          <Clock className="h-4 w-4 mr-1" />
-                          {course.duration}
-                        </div>
-                        <div className="flex items-center">
-                          <Users className="h-4 w-4 mr-1" />
-                          {course.students}
-                        </div>
-                        <div className="flex items-center">
-                          <Star className="h-4 w-4 mr-1 text-yellow-500" />
-                          {course.rating}
-                        </div>
-                      </div>
-
-                      <div className="mb-4">
-                        <div className="text-sm text-muted-foreground mb-2">Skills you&apos;ll learn:</div>
-                        <div className="flex flex-wrap gap-1">
-                          {course.skills.slice(0, 3).map((skill) => (
-                            <Badge key={skill} variant="outline" className="text-xs" style={{ borderColor: currentTheme.colors.border, color: currentTheme.colors.text }}>
-                              {skill}
-                            </Badge>
-                          ))}
-                          {course.skills.length > 3 && (
-                            <Badge variant="outline" className="text-xs" style={{ borderColor: currentTheme.colors.border, color: currentTheme.colors.text }}>
-                              +{course.skills.length - 3} more
-                            </Badge>
-                          )}
-                        </div>
-                      </div>
-
-                      <div className="mt-auto space-y-2">
-                        {isEnrolled(course.id) ? (
-                          <Button
-                            onClick={() => startCourse(course)}
-                            className="w-full bg-primary hover:bg-primary/90"
-                          >
-                            <Play className="h-4 w-4 mr-2" />
-                            Continue Learning
-                          </Button>
-                        ) : (
-                          <Button
-                            onClick={() => enrollInCourse(course.id)}
-                            disabled={!canEnroll(course)}
-                            className="w-full bg-cyber-green hover:bg-cyber-green/90 text-black disabled:opacity-50"
-                          >
-                            {canEnroll(course) ? (
-                              <>Enroll Now</>
-                            ) : (
-                              <>
-                                <Lock className="h-4 w-4 mr-2" />
-                                Prerequisites Required
-                              </>
-                            )}
-                          </Button>
-                        )}
-                        <Button
-                          variant="outline"
-                          onClick={() => setSelectedCourse(course)}
-                          className="w-full"
-                        >
-                          View Details
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              );
-            })}
-          </div>
-        </motion.div>
-
-        {/* All Courses */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-        >
-          <h2 className="text-2xl font-bold mb-4" style={{ color: currentTheme.colors.text }}>
-            All Courses ({filteredCourses.length})
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredCourses.map((course) => {
-              const Icon = getCategoryIcon(course.category);
-              return (
-                <motion.div
-                  key={course.id}
-                  whileHover={{ scale: 1.02 }}
-                  className="relative"
-                >
-                  <Card className={`${currentTheme.styles.cardClass} h-full`} style={{ borderColor: currentTheme.colors.border }}>
-                    <CardHeader>
-                      <div className="flex items-start justify-between">
-                        <div className="flex items-center space-x-3">
-                          <div className="p-2 bg-primary/10 rounded-lg">
-                            <Icon className="h-6 w-6 text-primary" />
-                          </div>
-                          <div>
-                            <Badge className="mb-1" variant="secondary" style={{ borderColor: currentTheme.colors.border, color: currentTheme.colors.text }}>
-                              {course.gradeLevel.charAt(0).toUpperCase() + course.gradeLevel.slice(1)}
-                            </Badge>
-                            <CardTitle className="text-lg" style={{ color: currentTheme.colors.text }}>{course.title}</CardTitle>
-                          </div>
-                        </div>
-                        <Badge variant={course.price === 'free' ? 'secondary' : 'default'} style={{ borderColor: currentTheme.colors.border, color: currentTheme.colors.text }}>
-                          {course.price === 'free' ? 'Free' : 'Premium'}
-                        </Badge>
-                      </div>
-                      <CardDescription className="line-clamp-2" style={{ color: currentTheme.colors.textSecondary }}>
-                        {course.description}
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent className="flex-1 flex flex-col">
-                      <div className="grid grid-cols-2 gap-4 text-sm text-muted-foreground mb-4">
-                        <div className="flex items-center">
-                          <Clock className="h-4 w-4 mr-1" />
-                          {course.duration}
-                        </div>
-                        <div className="flex items-center">
-                          <Star className="h-4 w-4 mr-1 text-yellow-500" />
-                          {course.rating} ({course.reviews})
-                        </div>
-                      </div>
-
-                      {course.prerequisites.length > 0 && (
-                        <div className="mb-4">
-                          <div className="text-sm text-muted-foreground mb-1">Prerequisites:</div>
-                          <div className="text-xs text-muted-foreground">
-                            {course.prerequisites.join(', ')}
-                          </div>
-                        </div>
-                      )}
-
-                      <div className="mt-auto space-y-2">
-                        {isEnrolled(course.id) ? (
-                          <Button
-                            onClick={() => startCourse(course)}
-                            className="w-full bg-primary hover:bg-primary/90"
-                          >
-                            <Play className="h-4 w-4 mr-2" />
-                            Continue Learning
-                          </Button>
-                        ) : (
-                          <Button
-                            onClick={() => enrollInCourse(course.id)}
-                            disabled={!canEnroll(course)}
-                            className="w-full bg-cyber-green hover:bg-cyber-green/90 text-black disabled:opacity-50"
-                          >
-                            {canEnroll(course) ? (
-                              <>Enroll Now</>
-                            ) : (
-                              <>
-                                <Lock className="h-4 w-4 mr-2" />
-                                Prerequisites Required
-                              </>
-                            )}
-                          </Button>
-                        )}
-                        <Button
-                          variant="outline"
-                          onClick={() => setSelectedCourse(course)}
-                          className="w-full"
-                        >
-                          View Details
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              );
-            })}
-          </div>
-        </motion.div>
-
-        {/* Course Detail Modal */}
-        <AnimatePresence>
-          {selectedCourse && (
+        {/* Books Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {filteredBooks.map((book, index) => (
             <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50"
-              onClick={() => setSelectedCourse(null)}
+              key={book.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.1 }}
             >
-              <motion.div
-                initial={{ scale: 0.9 }}
-                animate={{ scale: 1 }}
-                exit={{ scale: 0.9 }}
-                className="bg-background border border-border rounded-lg max-w-4xl w-full max-h-[80vh] overflow-y-auto"
-                style={{ 
-                  backgroundColor: currentTheme.colors.background,
-                  border: `1px solid ${currentTheme.colors.border}`
-                }}
-                onClick={(e) => e.stopPropagation()}
+              <Card 
+                className="cursor-pointer hover:shadow-lg transition-all bg-gradient-to-br from-gray-800/50 to-gray-900/50 backdrop-blur-sm border-gray-700/50"
+                onClick={() => handleBookClick(book)}
               >
-                <div className="p-6">
-                  <div className="flex items-start justify-between mb-6">
-                    <div>
-                      <h2 className="text-2xl font-bold text-foreground mb-2" style={{ color: currentTheme.colors.text }}>
-                        {selectedCourse.title}
-                      </h2>
-                      <p className="text-muted-foreground mb-4" style={{ color: currentTheme.colors.textSecondary }}>
-                        {selectedCourse.description}
-                      </p>
-                      <div className="flex items-center space-x-4 text-sm">
-                        <Badge style={{ backgroundColor: `${currentTheme.colors.primary}20`, color: currentTheme.colors.primary }}>
-                          {selectedCourse.gradeLevel.charAt(0).toUpperCase() + selectedCourse.gradeLevel.slice(1)}
+                <CardContent className="p-8">
+                  <div className="flex items-start gap-6">
+                    {/* Book Cover */}
+                    <div className={`w-20 h-28 bg-gradient-to-br ${book.coverColor} rounded-lg flex items-center justify-center shadow-lg flex-shrink-0`}>
+                      <BookOpen className="h-10 w-10 text-white" />
+                    </div>
+                    
+                    {/* Book Details */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-3 mb-3">
+                        <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30">
+                          Grade {book.grade}
                         </Badge>
-                        <div className="flex items-center text-muted-foreground">
-                          <Clock className="h-4 w-4 mr-1" />
-                          {selectedCourse.duration}
-                        </div>
-                        <div className="flex items-center text-muted-foreground">
-                          <Users className="h-4 w-4 mr-1" />
-                          {selectedCourse.students} students
-                        </div>
-                        <div className="flex items-center text-yellow-500">
-                          <Star className="h-4 w-4 mr-1 fill-current" />
-                          {selectedCourse.rating} ({selectedCourse.reviews} reviews)
-                        </div>
-                      </div>
+                        {book.enrolled && (
+                          <Badge className="bg-green-500/20 text-green-400 border-green-500/30">
+                      Enrolled
+                    </Badge>
+                        )}
+                  </div>
+                  
+                      <h3 className="text-xl font-bold text-white mb-2 line-clamp-1">
+                        {book.bookTitle}
+                      </h3>
+                      
+                      <p className="text-gray-300 text-sm mb-4 line-clamp-2">
+                        {book.description}
+                      </p>
+                      
+                      <div className="grid grid-cols-2 gap-4 mb-4 text-sm text-gray-400">
+                        <div className="flex items-center gap-1">
+                          <BookOpen className="h-4 w-4" />
+                          <span>{book.totalUnits} units</span>
                     </div>
-                    <Button
-                      variant="ghost"
-                      onClick={() => setSelectedCourse(null)}
-                    >
-                      ✕
-                    </Button>
+                        <div className="flex items-center gap-1">
+                          <Clock className="h-4 w-4" />
+                          <span>{book.estimatedTime}</span>
+                    </div>
+                        <div className="flex items-center gap-1">
+                          <Users className="h-4 w-4" />
+                          <span>{book.instructor}</span>
+                    </div>
+                        <div className="flex items-center gap-1">
+                          <BarChart className="h-4 w-4" />
+                          <span>{book.progress}% complete</span>
+                    </div>
                   </div>
 
-                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <div className="lg:col-span-2 space-y-6">
-                      {/* Course Modules */}
-                      <div>
-                        <h3 className="text-lg font-semibold mb-4" style={{ color: currentTheme.colors.text }}>Course Content</h3>
-                        <div className="space-y-3">
-                          {selectedCourse.modules.map((module, index) => (
-                            <div
-                              key={module.id}
-                              className="flex items-center justify-between p-3 border border-border rounded-lg"
-                            >
-                              <div className="flex items-center space-x-3">
-                                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-sm font-medium text-primary">
-                                  {index + 1}
-                                </div>
-                                <div>
-                                  <div className="font-medium" style={{ color: currentTheme.colors.text }}>{module.title}</div>
-                                  <div className="text-sm text-muted-foreground">
-                                    {module.lessons} lessons • {module.duration}
-                                  </div>
-                                </div>
-                              </div>
-                              {module.completed && (
-                                <CheckCircle className="h-5 w-5 text-cyber-green" />
-                              )}
-                            </div>
-                          ))}
+                      {book.enrolled && (
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between text-sm">
+                            <span className="font-medium text-white">
+                              Progress: {book.completedUnits}/{book.totalUnits} units
+                            </span>
+                            <span className="text-gray-400">{book.progress}%</span>
+                  </div>
+                          <Progress value={book.progress} className="h-2" />
                         </div>
-                      </div>
-
-                      {/* Skills */}
-                      <div>
-                        <h3 className="text-lg font-semibold mb-4" style={{ color: currentTheme.colors.text }}>Skills You&apos;ll Learn</h3>
-                        <div className="grid grid-cols-2 gap-2">
-                          {selectedCourse.skills.map((skill) => (
-                            <div
-                              key={skill}
-                              className="flex items-center space-x-2 p-2 bg-primary/5 rounded-lg"
-                            >
-                              <CheckCircle className="h-4 w-4 text-cyber-green" />
-                              <span className="text-sm" style={{ color: currentTheme.colors.text }}>{skill}</span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="space-y-6">
-                      {/* Instructor */}
-                      <Card className={currentTheme.styles.cardClass} style={{ borderColor: currentTheme.colors.border }}>
-                        <CardHeader>
-                          <CardTitle className="text-lg" style={{ color: currentTheme.colors.text }}>Instructor</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="text-center">
-                            <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-3">
-                              <Users className="h-8 w-8 text-primary" />
-                            </div>
-                            <h4 className="font-medium" style={{ color: currentTheme.colors.text }}>{selectedCourse.instructor}</h4>
-                            <p className="text-sm text-muted-foreground">
-                              Cybersecurity Expert
-                            </p>
-                          </div>
-                        </CardContent>
-                      </Card>
-
-                      {/* Prerequisites */}
-                      {selectedCourse.prerequisites.length > 0 && (
-                        <Card className={currentTheme.styles.cardClass} style={{ borderColor: currentTheme.colors.border }}>
-                          <CardHeader>
-                            <CardTitle className="text-lg" style={{ color: currentTheme.colors.text }}>Prerequisites</CardTitle>
-                          </CardHeader>
-                          <CardContent>
-                            <ul className="space-y-2">
-                              {selectedCourse.prerequisites.map((prereq) => (
-                                <li key={prereq} className="text-sm flex items-center">
-                                  <Target className="h-4 w-4 mr-2 text-muted-foreground" />
-                                  <span style={{ color: currentTheme.colors.text }}>{prereq}</span>
-                                </li>
-                              ))}
-                            </ul>
-                          </CardContent>
-                        </Card>
                       )}
-
-                      {/* Enrollment Action */}
-                      <div className="space-y-3">
-                        {isEnrolled(selectedCourse.id) ? (
-                          <Button
-                            onClick={() => {
-                              startCourse(selectedCourse);
-                              setSelectedCourse(null);
-                            }}
-                            className="w-full bg-primary hover:bg-primary/90"
-                            size="lg"
-                          >
-                            <Play className="h-4 w-4 mr-2" />
-                            Continue Learning
-                          </Button>
-                        ) : (
-                          <Button
-                            onClick={() => {
-                              enrollInCourse(selectedCourse.id);
-                              setSelectedCourse(null);
-                            }}
-                            disabled={!canEnroll(selectedCourse)}
-                            className="w-full bg-cyber-green hover:bg-cyber-green/90 text-black disabled:opacity-50"
-                            size="lg"
-                          >
-                            {canEnroll(selectedCourse) ? (
-                              <>
-                                <Award className="h-4 w-4 mr-2" />
-                                Enroll Now
-                              </>
-                            ) : (
-                              <>
-                                <Lock className="h-4 w-4 mr-2" />
-                                Prerequisites Required
-                              </>
-                            )}
-                          </Button>
-                        )}
-                        
-                        {selectedCourse.certificate && (
-                          <div className="text-center text-sm text-muted-foreground">
-                            <Award className="h-4 w-4 inline mr-1" />
-                            Certificate of completion available
-                          </div>
-                        )}
-                      </div>
                     </div>
+                    
+                    <ChevronRight className="h-5 w-5 text-gray-400 flex-shrink-0 mt-2" />
                   </div>
-                </div>
-              </motion.div>
+                </CardContent>
+              </Card>
             </motion.div>
-          )}
-        </AnimatePresence>
+          ))}
+        </div>
+
+        {filteredBooks.length === 0 && (
+          <div className="text-center py-12">
+            <BookOpen className="h-16 w-16 text-gray-500 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-gray-300 mb-2">No courses found</h3>
+            <p className="text-gray-500">Try adjusting your search criteria</p>
+          </div>
+        )}
       </main>
     </div>
   );
-}
+} 

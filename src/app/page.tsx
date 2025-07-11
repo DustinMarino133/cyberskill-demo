@@ -2,429 +2,592 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { motion, useInView } from 'framer-motion';
+import { motion, useInView, useScroll, useTransform, AnimatePresence } from 'framer-motion';
 import { 
   Shield, ArrowRight, Play, CheckCircle, Sparkles,
-  GraduationCap, School, Users, Trophy, Brain,
-  Target, Users2, Award, Globe, Heart, Lightbulb,
-  Rocket, Clock, Star, Zap, BookOpen, Lock
+  GraduationCap, Building2, Users, Brain, Target,
+  BookOpen, Code, Network, Monitor, Globe,
+  MessageSquare, Mail, Phone, MapPin, Github, Twitter, Linkedin,
+  Check, ArrowDown, ChevronRight, Menu, X, User,
+  Zap, Award, Eye, Lock
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
 
 export default function HomePage() {
   const router = useRouter();
-  const [currentStat, setCurrentStat] = useState(0);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [emailInput, setEmailInput] = useState('');
   const heroRef = useRef(null);
-  const featuresRef = useRef(null);
-  const statsRef = useRef(null);
+  const { scrollYProgress } = useScroll();
   const isHeroInView = useInView(heroRef);
-  const isFeaturesInView = useInView(featuresRef);
-  const isStatsInView = useInView(statsRef);
 
-  // Auto-cycle through stats
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentStat((prev) => (prev + 1) % 4);
-    }, 2000);
-    return () => clearInterval(interval);
-  }, []);
+  // Parallax effects
+  const heroY = useTransform(scrollYProgress, [0, 1], [0, -100]);
+  const bgY = useTransform(scrollYProgress, [0, 1], [0, 200]);
+  const floatingY = useTransform(scrollYProgress, [0, 1], [0, -50]);
 
-  const stats = [
-    { number: "50,000+", label: "Students Learning", icon: Users, description: "Active learners worldwide" },
-    { number: "1,200+", label: "Schools Using", icon: School, description: "Educational institutions" },
-    { number: "95%", label: "Success Rate", icon: Trophy, description: "Course completion rate" },
-    { number: "24/7", label: "AI Support", icon: Brain, description: "Intelligent assistance" }
-  ];
-
-  const gradeFeatures = [
+  const features = [
     {
-      grade: "Elementary (K-5)",
-      title: "Digital Citizenship Basics",
-      description: "Fun, interactive lessons teaching safe online behavior and digital responsibility",
-      features: ["Password Safety", "Stranger Danger Online", "Digital Footprints", "Cyberbullying Prevention"],
-      color: "from-emerald-500 to-teal-600",
-      icon: "🎒",
-      bgColor: "bg-gradient-to-br from-emerald-500/10 to-teal-600/10"
+      icon: Brain,
+      title: "AI-Powered Learning",
+      description: "Advanced artificial intelligence creates personalized learning paths that adapt to each student's pace and learning style."
     },
     {
-      grade: "Middle School (6-8)",
-      title: "Cyber Awareness Foundations",
-      description: "Building critical thinking skills for navigating the digital world safely",
-      features: ["Social Media Safety", "Phishing Recognition", "Privacy Settings", "Digital Ethics"],
-      color: "from-blue-500 to-indigo-600",
-      icon: "📚",
-      bgColor: "bg-gradient-to-br from-blue-500/10 to-indigo-600/10"
+      icon: Shield,
+      title: "Comprehensive Security Training",
+      description: "Master cybersecurity fundamentals through hands-on practice and real-world scenarios."
     },
     {
-      grade: "High School (9-12)",
-      title: "Advanced Cybersecurity",
-      description: "Comprehensive security concepts and career pathway exploration",
-      features: ["Network Security", "Cryptography Basics", "Ethical Hacking", "Career Preparation"],
-      color: "from-purple-500 to-violet-600",
-      icon: "🎓",
-      bgColor: "bg-gradient-to-br from-purple-500/10 to-violet-600/10"
+      icon: Target,
+      title: "Interactive Assessments",
+      description: "Test your knowledge with engaging quizzes and practical exercises designed by industry experts."
     },
     {
-      grade: "College & Adult",
-      title: "Professional Certification",
-      description: "Industry-standard training for cybersecurity professionals",
-      features: ["CISSP Prep", "CEH Training", "Security+", "Real-world Projects"],
-      color: "from-orange-500 to-red-600",
-      icon: "💼",
-      bgColor: "bg-gradient-to-br from-orange-500/10 to-red-600/10"
+      icon: Network,
+      title: "Collaborative Learning",
+      description: "Connect with students and educators worldwide in a supportive learning community."
     }
   ];
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1
-      }
+  const services = [
+    {
+      title: "Student Platform",
+      description: "Comprehensive cybersecurity education with AI-powered tools and interactive learning experiences.",
+      features: ["AI Study Cards", "Interactive Quizzes", "Structured Courses", "24/7 AI Assistant"],
+      cta: "Start Learning",
+      route: "/auth/login",
+      icon: GraduationCap,
+      gradient: "from-blue-400 to-blue-600"
+    },
+    {
+      title: "Corporate Training",
+      description: "Professional cybersecurity training programs for businesses and organizations.",
+      features: ["Security Awareness", "Compliance Training", "Risk Assessment", "Progress Tracking"],
+      cta: "Secure Your Business",
+      route: "/auth/login",
+      icon: Building2,
+      gradient: "from-blue-500 to-cyan-500"
+    },
+    {
+      title: "Educational Solutions",
+      description: "Complete curriculum management and student progress tracking for educational institutions.",
+      features: ["Curriculum Management", "Student Analytics", "Assessment Tools", "Progress Reports"],
+      cta: "Enhance Education",
+      route: "/auth/login",
+      icon: Users,
+      gradient: "from-cyan-400 to-blue-500"
     }
-  };
+  ];
 
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0 }
+  const benefits = [
+    {
+      icon: BookOpen,
+      title: "Structured Learning",
+      points: [
+        "Grade-appropriate content from 6th to 12th grade",
+        "Progressive skill building",
+        "Clear learning objectives"
+      ]
+    },
+    {
+      icon: Brain,
+      title: "AI-Enhanced Education",
+      points: [
+        "Personalized learning recommendations",
+        "Intelligent content generation",
+        "Adaptive assessment tools"
+      ]
+    },
+    {
+      icon: Users,
+      title: "Community Support",
+      points: [
+        "Expert instructor guidance",
+        "Peer collaboration features",
+        "Active learning community"
+      ]
+    }
+  ];
+
+  const handleEmailSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setEmailInput('');
+    alert('Thank you for your interest! We will be in touch soon.');
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 overflow-hidden">
-      {/* Enhanced Animated Background */}
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 text-white overflow-hidden relative">
+      {/* Animated Background Elements */}
       <div className="fixed inset-0 z-0">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-cyber-purple/5 to-cyber-blue/5" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_25%_25%,rgba(83,109,226,0.15),transparent_50%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_75%_75%,rgba(139,92,246,0.1),transparent_50%)]" />
-        <div className="cyber-grid-lg opacity-20" />
+        {/* Animated gradient orbs with parallax */}
+        <motion.div 
+          style={{ y: bgY }}
+          className="absolute inset-0"
+        >
+          <div className="absolute top-20 left-20 w-72 h-72 bg-blue-500/20 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute top-40 right-20 w-72 h-72 bg-cyan-500/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+          <div className="absolute bottom-20 left-1/2 w-72 h-72 bg-blue-400/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
+        </motion.div>
+
+        {/* Subtle grid pattern */}
+        <div 
+          className="absolute inset-0 opacity-5"
+          style={{
+            backgroundImage: `
+              linear-gradient(rgba(59, 130, 246, 0.5) 1px, transparent 1px),
+              linear-gradient(90deg, rgba(59, 130, 246, 0.5) 1px, transparent 1px)
+            `,
+            backgroundSize: '60px 60px'
+          }}
+        />
         
-        {/* Enhanced Floating Elements */}
-        {[...Array(6)].map((_, i) => (
+        {/* Floating elements with parallax */}
+        {[...Array(15)].map((_, i) => (
           <motion.div
             key={i}
+            className="absolute w-2 h-2 bg-blue-400/30 rounded-full"
+            style={{ 
+              y: floatingY,
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`
+            }}
             animate={{
               y: [0, -30, 0],
-              x: [0, Math.sin(i) * 20, 0],
-              rotate: [0, 360]
+              opacity: [0.3, 0.8, 0.3],
             }}
             transition={{
-              duration: 8 + i * 2,
+              duration: 4 + Math.random() * 2,
               repeat: Infinity,
-              ease: "easeInOut",
-              delay: i * 1.5
-            }}
-            className={`absolute w-2 h-2 rounded-full blur-sm ${
-              i % 3 === 0 ? 'bg-primary' : i % 3 === 1 ? 'bg-cyber-blue' : 'bg-cyber-purple'
-            }`}
-            style={{
-              top: `${20 + (i * 15) % 60}%`,
-              left: `${10 + (i * 20) % 80}%`,
+              delay: Math.random() * 2,
             }}
           />
         ))}
       </div>
 
-      <main className="relative z-10">
-        {/* Enhanced Hero Section */}
-        <section ref={heroRef} className="kokonut-hero">
-          <div className="max-w-7xl mx-auto px-4 text-center">
+      {/* Navigation */}
+      <nav className="fixed top-0 w-full z-50 bg-slate-900/20 backdrop-blur-xl border-b border-blue-500/20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
             <motion.div
-              variants={containerVariants}
-              initial="hidden"
-              animate={isHeroInView ? "visible" : "hidden"}
-              className="space-y-8"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="flex items-center space-x-3"
             >
-              {/* Logo with Enhanced Animation */}
-              <motion.div
-                variants={itemVariants}
-                className="flex justify-center mb-8"
-              >
-                <motion.div
-                  whileHover={{ scale: 1.1, rotate: 5 }}
-                  className="relative"
-                >
-                  <div className="absolute inset-0 bg-gradient-to-r from-primary to-cyber-blue rounded-full blur-xl opacity-50 animate-pulse-slow" />
-                  <div className="relative w-24 h-24 bg-gradient-to-br from-primary via-cyber-blue to-cyber-purple rounded-full flex items-center justify-center shadow-cyber-strong">
-                    <Shield className="h-12 w-12 text-white" />
-                  </div>
-                </motion.div>
-              </motion.div>
-              
-              {/* Enhanced Title */}
-              <motion.div variants={itemVariants} className="space-y-6">
-                <h1 className="text-6xl md:text-8xl lg:text-9xl font-bold">
-                  <span className="gradient-text">CyberSkill</span>
-                  <span className="glow-text">.AI</span>
-                </h1>
-                
-                <div className="space-y-4">
-                  <p className="text-2xl md:text-3xl text-slate-200 font-light">
-                    The Revolutionary Cybersecurity Education Platform
-                  </p>
-                  
-                  <p className="text-lg md:text-xl text-slate-400 max-w-4xl mx-auto leading-relaxed">
-                    Empowering students from K-12 to college with AI-powered cybersecurity education. 
-                    Making digital safety engaging, accessible, and effective for the next generation.
-                  </p>
-                </div>
-              </motion.div>
-
-              {/* Enhanced CTA Buttons */}
-              <motion.div
-                variants={itemVariants}
-                className="flex flex-col sm:flex-row gap-6 justify-center items-center"
-              >
-                <motion.div
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <Button 
-                    size="lg"
-                    className="kokonut-button kokonut-button-primary px-10 py-4 text-lg font-semibold group"
-                    onClick={() => router.push('/auth/login')}
-                  >
-                    <Play className="h-5 w-5 mr-3 group-hover:scale-110 transition-transform" />
-                    Start Learning Now
-                    <ArrowRight className="h-5 w-5 ml-3 group-hover:translate-x-1 transition-transform" />
-                  </Button>
-                </motion.div>
-                
-                <motion.div
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <Button 
-                    size="lg" 
-                    variant="outline"
-                    className="glassmorphism border-white/20 text-slate-200 hover:bg-white/10 px-10 py-4 text-lg font-semibold group"
-                    onClick={() => {
-                      document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' });
-                    }}
-                  >
-                    <Lightbulb className="h-5 w-5 mr-3 group-hover:rotate-12 transition-transform" />
-                    Explore Features
-                  </Button>
-                </motion.div>
-              </motion.div>
-
-              {/* Enhanced Trust Indicators */}
-              <motion.div
-                variants={itemVariants}
-                className="flex flex-wrap justify-center gap-8 pt-8 text-slate-400"
-              >
-                {[
-                  { icon: CheckCircle, text: "Free for educators" },
-                  { icon: Zap, text: "No setup required" },
-                  { icon: Star, text: "Instant access" }
-                ].map(({ icon: Icon, text }, index) => (
-                  <div key={index} className="flex items-center gap-2">
-                    <Icon className="h-5 w-5 text-primary" />
-                    <span className="text-sm font-medium">{text}</span>
-                  </div>
-                ))}
-              </motion.div>
-            </motion.div>
-          </div>
-        </section>
-
-        {/* Enhanced Live Stats Section */}
-        <section ref={statsRef} className="kokonut-section">
-          <div className="max-w-6xl mx-auto">
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={isStatsInView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.8 }}
-              className="kokonut-grid-4"
-            >
-              {stats.map((stat, index) => {
-                const Icon = stat.icon;
-                const isActive = currentStat === index;
-                return (
-                  <motion.div
-                    key={index}
-                    animate={{
-                      scale: isActive ? 1.05 : 1,
-                      y: isActive ? -5 : 0
-                    }}
-                    transition={{ duration: 0.3 }}
-                    className="group"
-                  >
-                    <div className={`kokonut-card text-center h-full transition-all duration-300 ${
-                      isActive ? 'cyber-glow-strong' : 'hover:cyber-glow'
-                    }`}>
-                      <div className="flex justify-center mb-4">
-                        <div className={`p-3 rounded-full transition-all duration-300 ${
-                          isActive 
-                            ? 'bg-gradient-to-r from-primary to-cyber-blue shadow-cyber' 
-                            : 'bg-slate-800 group-hover:bg-slate-700'
-                        }`}>
-                          <Icon className={`h-8 w-8 transition-colors duration-300 ${
-                            isActive ? 'text-white' : 'text-slate-400 group-hover:text-primary'
-                          }`} />
-                        </div>
-                      </div>
-                      
-                      <div className={`text-3xl md:text-4xl font-bold mb-2 transition-colors duration-300 ${
-                        isActive ? 'text-primary' : 'text-white group-hover:text-primary'
-                      }`}>
-                        {stat.number}
-                      </div>
-                      
-                      <div className="text-slate-300 font-medium mb-1">{stat.label}</div>
-                      <div className="text-sm text-slate-500">{stat.description}</div>
-                    </div>
-                  </motion.div>
-                );
-              })}
-            </motion.div>
-          </div>
-        </section>
-
-        {/* Enhanced Grade-Level Features */}
-        <section id="features" ref={featuresRef} className="kokonut-section">
-          <div className="max-w-7xl mx-auto">
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={isFeaturesInView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.8 }}
-              className="text-center mb-20"
-            >
-              <motion.div
-                initial={{ scale: 0 }}
-                animate={isFeaturesInView ? { scale: 1 } : {}}
-                transition={{ delay: 0.3, type: "spring", stiffness: 100 }}
-              >
-                <Badge className="mb-6 bg-gradient-to-r from-primary to-cyber-blue text-white px-6 py-3 text-lg font-semibold">
-                  <GraduationCap className="h-5 w-5 mr-2" />
-                  Tailored for Every Grade Level
-                </Badge>
-              </motion.div>
-              
-              <h2 className="text-5xl md:text-6xl font-bold mb-6">
-                <span className="gradient-text">Age-Appropriate</span>{" "}
-                <span className="text-white">Cybersecurity Education</span>
-              </h2>
-              
-              <p className="text-xl md:text-2xl text-slate-300 max-w-4xl mx-auto leading-relaxed">
-                From digital citizenship basics to professional certification, we provide comprehensive 
-                cybersecurity education that grows with your students.
-              </p>
-            </motion.div>
-
-            <div className="kokonut-grid-4">
-              {gradeFeatures.map((feature, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, y: 50 }}
-                  animate={isFeaturesInView ? { opacity: 1, y: 0 } : {}}
-                  transition={{ delay: index * 0.15, duration: 0.8 }}
-                  whileHover={{ y: -10, scale: 1.02 }}
-                  className="group h-full"
-                >
-                  <div className={`kokonut-card h-full ${feature.bgColor} group-hover:cyber-glow transition-all duration-300`}>
-                    <div className="text-center mb-6">
-                      <div className="text-5xl mb-4 animate-bounce-slow">{feature.icon}</div>
-                      <Badge className={`bg-gradient-to-r ${feature.color} text-white mb-4 px-4 py-2 font-semibold`}>
-                        {feature.grade}
-                      </Badge>
-                    </div>
-                    
-                    <div className="space-y-4">
-                      <h3 className="text-xl font-bold text-white group-hover:text-primary transition-colors">
-                        {feature.title}
-                      </h3>
-                      
-                      <p className="text-slate-300 leading-relaxed">
-                        {feature.description}
-                      </p>
-                      
-                      <div className="space-y-3 pt-4">
-                        {feature.features.map((item, idx) => (
-                          <div key={idx} className="flex items-center text-slate-300 group-hover:text-slate-200 transition-colors">
-                            <div className="w-2 h-2 bg-gradient-to-r from-primary to-cyber-blue rounded-full mr-3 flex-shrink-0" />
-                            <span className="text-sm font-medium">{item}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* Enhanced Final CTA */}
-        <section className="kokonut-section bg-gradient-to-br from-primary/10 via-cyber-purple/5 to-cyber-blue/10">
-          <div className="max-w-5xl mx-auto text-center">
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
-              className="glassmorphism-strong rounded-3xl p-12 md:p-16"
-            >
-              <div className="space-y-8">
-                <div className="space-y-6">
-                  <h2 className="text-4xl md:text-6xl font-bold">
-                    <span className="text-white">Ready to Transform</span><br />
-                    <span className="gradient-text">Cybersecurity Education?</span>
-                  </h2>
-                  
-                  <p className="text-xl md:text-2xl text-slate-300 max-w-3xl mx-auto leading-relaxed">
-                    Join thousands of educators and students who are already building a safer digital future with CyberSkill.AI
-                  </p>
-                </div>
-                
-                <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
-                  <motion.div
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    <Button 
-                      size="lg"
-                      className="kokonut-button kokonut-button-primary px-12 py-5 text-xl font-semibold group"
-                      onClick={() => router.push('/auth/login')}
-                    >
-                      <Rocket className="h-6 w-6 mr-3 group-hover:rotate-12 transition-transform" />
-                      Start Free Demo
-                    </Button>
-                  </motion.div>
-                  
-                  <motion.div
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    <Button 
-                      size="lg" 
-                      variant="outline"
-                      className="glassmorphism border-white/20 text-slate-200 hover:bg-white/10 px-12 py-5 text-xl font-semibold group"
-                    >
-                      <Clock className="h-6 w-6 mr-3 group-hover:scale-110 transition-transform" />
-                      Schedule Demo
-                    </Button>
-                  </motion.div>
-                </div>
-
-                <div className="flex flex-wrap justify-center gap-8 pt-8 text-slate-400">
-                  {[
-                    { icon: CheckCircle, text: "Free for educators" },
-                    { icon: Lock, text: "Enterprise security" },
-                    { icon: BookOpen, text: "Comprehensive curriculum" }
-                  ].map(({ icon: Icon, text }, index) => (
-                    <div key={index} className="flex items-center gap-2">
-                      <Icon className="h-5 w-5 text-primary" />
-                      <span className="font-medium">{text}</span>
-                    </div>
-                  ))}
-                </div>
+              <div className="p-2 bg-gradient-to-r from-blue-500/20 to-cyan-500/20 rounded-lg border border-blue-500/30">
+                <Shield className="h-6 w-6 text-blue-400" />
+              </div>
+              <div>
+                <span className="text-xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
+                  CyberSkill
+                </span>
+                <p className="text-xs text-gray-400">Education Platform</p>
               </div>
             </motion.div>
+
+            {/* Desktop Navigation */}
+            <div className="hidden md:flex items-center space-x-8">
+              <a href="#home" className="text-gray-300 hover:text-blue-400 transition-colors">Home</a>
+              <a href="#about" className="text-gray-300 hover:text-blue-400 transition-colors">About</a>
+              <a href="#services" className="text-gray-300 hover:text-blue-400 transition-colors">Services</a>
+              <a href="#benefits" className="text-gray-300 hover:text-blue-400 transition-colors">Benefits</a>
+              <a href="#contact" className="text-gray-300 hover:text-blue-400 transition-colors">Contact</a>
+            </div>
+
+            <div className="flex items-center space-x-4">
+              <Button 
+                onClick={() => router.push('/auth/login')}
+                className="hidden md:block bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white border-none"
+              >
+                Get Started
+              </Button>
+
+              {/* Mobile menu button */}
+              <div className="md:hidden">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setIsMenuOpen(!isMenuOpen)}
+                  className="text-white"
+                >
+                  {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+                </Button>
+              </div>
+            </div>
           </div>
-        </section>
-      </main>
+        </div>
+        
+        {/* Mobile Navigation */}
+        <AnimatePresence>
+          {isMenuOpen && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="md:hidden bg-slate-900/30 backdrop-blur-xl border-t border-blue-500/20"
+            >
+              <div className="px-4 py-4 space-y-4">
+                <a href="#home" className="block text-gray-300 hover:text-blue-400 transition-colors">Home</a>
+                <a href="#about" className="block text-gray-300 hover:text-blue-400 transition-colors">About</a>
+                <a href="#services" className="block text-gray-300 hover:text-blue-400 transition-colors">Services</a>
+                <a href="#benefits" className="block text-gray-300 hover:text-blue-400 transition-colors">Benefits</a>
+                <a href="#contact" className="block text-gray-300 hover:text-blue-400 transition-colors">Contact</a>
+                <Button 
+                  onClick={() => router.push('/auth/login')}
+                  className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white border-none"
+                >
+                  Get Started
+                </Button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </nav>
+                
+      {/* Hero Section */}
+      <section id="home" ref={heroRef} className="relative min-h-screen flex items-center justify-center">
+        <motion.div 
+          style={{ y: heroY }}
+          className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center"
+        >
+          <motion.div 
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+          >
+            <Badge className="mb-6 bg-blue-500/20 backdrop-blur-sm text-blue-300 border-blue-500/30 px-6 py-2">
+              Next-Generation Cybersecurity Education
+            </Badge>
+            <h1 className="text-5xl md:text-7xl font-bold mb-6">
+              Master{' '}
+              <motion.span 
+                className="bg-gradient-to-r from-blue-400 via-cyan-400 to-blue-500 bg-clip-text text-transparent"
+                animate={{
+                  backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
+                }}
+                transition={{
+                  duration: 3,
+                  repeat: Infinity,
+                  ease: "linear"
+                }}
+                style={{
+                  backgroundSize: '200% 200%'
+                }}
+              >
+                Cybersecurity
+              </motion.span>
+            </h1>
+            <p className="text-xl md:text-2xl text-gray-300 mb-8 max-w-4xl mx-auto leading-relaxed">
+              The comprehensive platform for cybersecurity education. Learn through interactive courses, 
+              AI-powered tools, and hands-on practice designed for students from grade 6 through 12.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+              <Button 
+                size="lg"
+                onClick={() => router.push('/auth/login')}
+                className="px-8 py-4 text-lg bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white shadow-lg border-none"
+              >
+                Start Learning Today
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
+              <Button 
+                size="lg"
+                variant="outline"
+                className="px-8 py-4 text-lg border-blue-500/30 text-blue-300 hover:bg-blue-500/10 backdrop-blur-sm"
+              >
+                <Play className="mr-2 h-5 w-5" />
+                Watch Demo
+              </Button>
+            </div>
+          </motion.div>
+
+          {/* Scroll Indicator */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 1 }}
+            className="absolute bottom-8 left-1/2 transform -translate-x-1/2"
+          >
+            <motion.div
+              animate={{ y: [0, 10, 0] }}
+              transition={{ duration: 2, repeat: Infinity }}
+              className="text-blue-400"
+            >
+              <ArrowDown className="h-6 w-6" />
+            </motion.div>
+          </motion.div>
+        </motion.div>
+      </section>
+
+      {/* About Section */}
+      <section id="about" className="py-24 relative z-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 backdrop-blur-md border border-blue-500/20 rounded-2xl p-8"
+            >
+              <Badge className="mb-4 bg-blue-500/20 text-blue-300 border-blue-500/30">
+                About CyberSkill
+              </Badge>
+              <h2 className="text-4xl font-bold text-white mb-6">
+                Leading the Future of{' '}
+                <span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
+                  Cybersecurity Education
+                </span>
+              </h2>
+              <p className="text-gray-300 text-lg mb-6 leading-relaxed">
+                Created by cybersecurity experts and educational specialists, CyberSkill provides 
+                comprehensive cybersecurity education tailored for students. Our platform combines 
+                cutting-edge AI with proven educational methodologies.
+              </p>
+              <p className="text-gray-300 text-lg mb-8 leading-relaxed">
+                With partnerships across educational institutions and industry leaders, 
+                we're building a more secure digital future through quality education.
+              </p>
+              <div className="space-y-4">
+                {['AI-Powered Learning Tools', 'Real-World Practice Scenarios', 'Expert-Designed Curriculum', 'Continuous Innovation'].map((item, index) => (
+                  <div key={index} className="flex items-center space-x-3">
+                    <CheckCircle className="h-5 w-5 text-blue-400" />
+                    <span className="text-gray-300">{item}</span>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              className="relative"
+            >
+              <img 
+                src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=2970&auto=format&fit=crop"
+                alt="Cybersecurity Education"
+                className="rounded-2xl shadow-2xl"
+              />
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-cyan-500/20 rounded-2xl"></div>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* Features Section */}
+      <section className="py-24 relative z-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-16"
+          >
+            <h2 className="text-4xl font-bold text-white mb-4">
+              Why Choose{' '}
+              <span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
+                CyberSkill
+              </span>
+            </h2>
+            <p className="text-gray-300 text-lg max-w-3xl mx-auto">
+              Our platform offers comprehensive features designed to enhance cybersecurity education
+            </p>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {features.map((feature, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1 }}
+                viewport={{ once: true }}
+                className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 backdrop-blur-md border border-blue-500/20 rounded-xl p-6 text-center"
+              >
+                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-r from-blue-500/20 to-cyan-500/20 mb-4">
+                  <feature.icon className="h-8 w-8 text-blue-400" />
+                </div>
+                <h3 className="text-xl font-semibold text-white mb-3">{feature.title}</h3>
+                <p className="text-gray-300">{feature.description}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Services Section */}
+      <section id="services" className="py-24 relative z-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-16"
+          >
+            <h2 className="text-4xl font-bold text-white mb-4">
+              Our{' '}
+              <span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
+                Services
+              </span>
+            </h2>
+            <p className="text-gray-300 text-lg max-w-3xl mx-auto">
+              Comprehensive cybersecurity education solutions for students, businesses, and educational institutions
+            </p>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {services.map((service, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.2 }}
+                viewport={{ once: true }}
+              >
+                <Card className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 backdrop-blur-md border-blue-500/20 h-full">
+                  <CardHeader className="text-center pb-4">
+                    <div className={`inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-r ${service.gradient} bg-opacity-20 mb-4`}>
+                      <service.icon className="h-8 w-8 text-blue-400" />
+                    </div>
+                    <CardTitle className="text-2xl text-white">{service.title}</CardTitle>
+                  </CardHeader>
+                  <CardContent className="text-center">
+                    <p className="text-gray-300 mb-6">{service.description}</p>
+                    <ul className="space-y-2 mb-8">
+                      {service.features.map((feature, featureIndex) => (
+                        <li key={featureIndex} className="flex items-center text-gray-300">
+                          <Check className="h-4 w-4 text-blue-400 mr-2" />
+                          {feature}
+                        </li>
+                      ))}
+                    </ul>
+                    <Button 
+                      onClick={() => router.push(service.route)}
+                      className={`w-full bg-gradient-to-r ${service.gradient} hover:opacity-90 text-white border-none`}
+                    >
+                      {service.cta}
+                    </Button>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Benefits Section */}
+      <section id="benefits" className="py-24 relative z-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-16"
+          >
+            <h2 className="text-4xl font-bold text-white mb-4">
+              Key{' '}
+              <span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
+                Benefits
+              </span>
+            </h2>
+            <p className="text-gray-300 text-lg max-w-3xl mx-auto">
+              Discover the advantages of learning cybersecurity with CyberSkill
+            </p>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {benefits.map((benefit, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.2 }}
+                viewport={{ once: true }}
+                className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 backdrop-blur-md border border-blue-500/20 rounded-xl p-6"
+              >
+                <div className="flex items-center mb-4">
+                  <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-r from-blue-500/20 to-cyan-500/20 mr-4">
+                    <benefit.icon className="h-6 w-6 text-blue-400" />
+                  </div>
+                  <h3 className="text-xl font-semibold text-white">{benefit.title}</h3>
+                </div>
+                <ul className="space-y-3">
+                  {benefit.points.map((point, pointIndex) => (
+                    <li key={pointIndex} className="flex items-start text-gray-300">
+                      <ArrowRight className="h-4 w-4 text-blue-400 mr-2 mt-0.5 flex-shrink-0" />
+                      {point}
+                    </li>
+                  ))}
+                </ul>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Contact Section */}
+      <section id="contact" className="py-24 relative z-10">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 backdrop-blur-md border border-blue-500/20 rounded-2xl p-8"
+          >
+            <h2 className="text-4xl font-bold text-white mb-4">
+              Ready to Start{' '}
+              <span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
+                Learning?
+              </span>
+            </h2>
+            <p className="text-gray-300 text-lg mb-8">
+              Join thousands of students already mastering cybersecurity with CyberSkill
+            </p>
+            
+            <form onSubmit={handleEmailSubmit} className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto mb-8">
+              <Input
+                type="email"
+                placeholder="Enter your email"
+                value={emailInput}
+                onChange={(e) => setEmailInput(e.target.value)}
+                className="flex-1 bg-slate-800/50 border-blue-500/30 text-white placeholder-gray-400"
+                required
+              />
+              <Button 
+                type="submit"
+                className="bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white border-none"
+              >
+                Get Started
+              </Button>
+            </form>
+
+            <div className="flex justify-center space-x-6">
+              <a href="#" className="text-gray-400 hover:text-blue-400 transition-colors">
+                <Mail className="h-6 w-6" />
+              </a>
+              <a href="#" className="text-gray-400 hover:text-blue-400 transition-colors">
+                <Github className="h-6 w-6" />
+              </a>
+              <a href="#" className="text-gray-400 hover:text-blue-400 transition-colors">
+                <Twitter className="h-6 w-6" />
+              </a>
+              <a href="#" className="text-gray-400 hover:text-blue-400 transition-colors">
+                <Linkedin className="h-6 w-6" />
+              </a>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="relative z-10 py-12 border-t border-blue-500/20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <p className="text-gray-400">
+            © 2024 CyberSkill. All rights reserved. Empowering the next generation of cybersecurity professionals.
+          </p>
+        </div>
+      </footer>
     </div>
   );
-}
+} 

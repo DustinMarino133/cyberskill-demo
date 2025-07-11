@@ -3,208 +3,210 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { Shield, User, GraduationCap, Building2, Eye, EyeOff } from 'lucide-react';
+import { Shield, User, Lock, ArrowRight, Building2, GraduationCap, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { authenticateUser } from '@/lib/demo-data';
-import { toast } from 'react-hot-toast';
+
+type UserRole = 'student' | 'teacher' | 'corporate';
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('');
+  const [selectedRole, setSelectedRole] = useState<UserRole>('student');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [, setSelectedPlatform] = useState<'student' | 'teacher' | 'corporate'>('student');
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
-  const demoCredentials = [
-    { role: 'student', email: 'student@demo.com', icon: GraduationCap, label: 'Student', description: 'Learn cybersecurity with AI-powered tools' },
-    { role: 'teacher', email: 'teacher@demo.com', icon: User, label: 'Teacher', description: 'Manage classes and track student progress' },
-    { role: 'corporate', email: 'corporate@demo.com', icon: Building2, label: 'Corporate', description: 'Enterprise security training and analytics' },
+  const roles = [
+    { id: 'student' as UserRole, name: 'Student', icon: GraduationCap, description: 'Access courses and AI tools' },
+    { id: 'teacher' as UserRole, name: 'Teacher', icon: Users, description: 'Manage students and curriculum' },
+    { id: 'corporate' as UserRole, name: 'Corporate', icon: Building2, description: 'Employee training portal' }
   ];
 
-  const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
-    try {
-      const user = authenticateUser(email, password);
-      
-      if (user) {
-        // Store user session (in real app, this would be handled by proper auth)
-        localStorage.setItem('currentUser', JSON.stringify(user));
-        
-        // Redirect based on role
-        const redirectPaths = {
-          student: '/student/dashboard',
-          teacher: '/teacher/dashboard',
-          corporate: '/corporate/dashboard',
-        };
-        
-        toast.success(`Welcome back, ${user.name}!`);
-        router.push(redirectPaths[user.role]);
-      } else {
-        toast.error('Invalid credentials. Please use the demo accounts.');
-      }
-    } catch {
-      toast.error('Login failed. Please try again.');
-    } finally {
-      setIsLoading(false);
+    // Simulate authentication
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    // Store user data
+    localStorage.setItem('currentUser', JSON.stringify({
+      username,
+      role: selectedRole,
+      isAuthenticated: true
+    }));
+
+    // Navigate based on role
+    switch (selectedRole) {
+      case 'student':
+        router.push('/student/class-selection');
+        break;
+      case 'teacher':
+        router.push('/teacher/dashboard');
+        break;
+      case 'corporate':
+        router.push('/corporate/dashboard');
+        break;
     }
   };
 
-  const autofillDemo = (role: string, demoEmail: string) => {
-    setEmail(demoEmail);
-    setPassword('password123');
-    setSelectedPlatform(role as 'student' | 'teacher' | 'corporate');
-  };
-
   return (
-    <div className="min-h-screen bg-background cyber-grid flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-cyber-purple/5" />
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 flex items-center justify-center relative overflow-hidden">
+      {/* Background Elements */}
+      <div className="absolute inset-0">
+        {/* Gradient orbs */}
+        <div className="absolute top-20 left-20 w-72 h-72 bg-blue-500/20 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-20 right-20 w-72 h-72 bg-cyan-500/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+        
+        {/* Grid pattern */}
+        <div 
+          className="absolute inset-0 opacity-5"
+          style={{
+            backgroundImage: `
+              linear-gradient(rgba(59, 130, 246, 0.5) 1px, transparent 1px),
+              linear-gradient(90deg, rgba(59, 130, 246, 0.5) 1px, transparent 1px)
+            `,
+            backgroundSize: '60px 60px'
+          }}
+        />
+      </div>
       
-      <motion.div
+        <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="relative z-10 w-full max-w-md"
+        className="relative z-10 w-full max-w-md px-4"
       >
-        <Card className="cyber-card">
+        <Card className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 backdrop-blur-xl border-blue-500/20">
           <CardHeader className="text-center">
-            <motion.div
-              initial={{ scale: 0 }}
+              <motion.div
+              initial={{ scale: 0.8 }}
               animate={{ scale: 1 }}
-              transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-              className="flex justify-center mb-4"
-            >
-              <div className="p-3 bg-primary/10 rounded-full">
-                <Shield className="h-8 w-8 text-primary" />
-              </div>
-            </motion.div>
-            
-            <CardTitle className="text-2xl font-bold text-foreground">
-              CyberSkill.AI
-            </CardTitle>
-            <CardDescription className="text-muted-foreground">
-              Cybersecurity Education Platform
-            </CardDescription>
-            
-            <Badge variant="secondary" className="mt-2 bg-cyber-blue/20 text-cyber-blue border-cyber-blue/30">
-              🚀 DEMO VERSION
-            </Badge>
-          </CardHeader>
+              transition={{ type: "spring", stiffness: 200 }}
+                className="flex justify-center mb-4"
+              >
+              <div className="p-3 bg-gradient-to-r from-blue-500/20 to-cyan-500/20 rounded-lg border border-blue-500/30">
+                <Shield className="h-8 w-8 text-blue-400" />
+                </div>
+              </motion.div>
+            <CardTitle className="text-2xl font-bold text-white">
+              Welcome to CyberSkill
+              </CardTitle>
+            <CardDescription className="text-gray-400">
+              Sign in to access your cybersecurity education platform
+              </CardDescription>
+            </CardHeader>
 
-          <CardContent className="space-y-6">
-            {/* Demo Credentials Section */}
-            <div className="space-y-3">
-              <Label className="text-sm font-medium text-foreground">
-                Demo Accounts (Click to auto-fill)
-              </Label>
-              <div className="grid gap-2">
-                {demoCredentials.map((cred) => (
-                  <motion.button
-                    key={cred.role}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={() => autofillDemo(cred.role, cred.email)}
-                    className="flex items-center gap-3 p-3 rounded-lg border border-border hover:border-primary/50 transition-colors text-left"
-                  >
-                    <cred.icon className="h-5 w-5 text-primary" />
-                    <div className="flex-1">
-                      <div className="font-medium text-foreground">{cred.label}</div>
-                      <div className="text-xs text-muted-foreground">{cred.email}</div>
-                    </div>
-                  </motion.button>
-                ))}
-              </div>
-              <p className="text-xs text-muted-foreground text-center">
-                Password: <code className="bg-muted px-1 rounded">password123</code>
-              </p>
-            </div>
-
-            {/* Login Form */}
-            <form onSubmit={handleLogin} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="Enter your email"
-                    value={email}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
-                    required
-                    className="bg-input border-border"
-                  />
+          <CardContent>
+            <form onSubmit={handleLogin} className="space-y-6">
+              {/* Role Selection */}
+              <div className="space-y-3">
+                <Label className="text-gray-300">Select your role</Label>
+                <div className="grid grid-cols-3 gap-3">
+                  {roles.map((role) => (
+                    <motion.button
+                      key={role.id}
+                      type="button"
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={() => setSelectedRole(role.id)}
+                      className={`p-3 rounded-lg border transition-all ${
+                        selectedRole === role.id
+                          ? 'bg-gradient-to-r from-blue-500/20 to-cyan-500/20 border-blue-400 text-white'
+                          : 'bg-gray-800/50 border-gray-700 text-gray-400 hover:border-gray-600'
+                      }`}
+                    >
+                      <role.icon className="h-5 w-5 mx-auto mb-1" />
+                      <p className="text-xs font-medium">{role.name}</p>
+                    </motion.button>
+                  ))}
+                </div>
+                <p className="text-xs text-gray-500 text-center mt-2">
+                  {roles.find(r => r.id === selectedRole)?.description}
+                </p>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
+              {/* Username Input */}
+                <div className="space-y-2">
+                <Label htmlFor="username" className="text-gray-300">
+                  Username
+                  </Label>
                 <div className="relative">
-                                      <Input
+                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
+                  <Input
+                    id="username"
+                    type="text"
+                    placeholder="Enter your username"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    className="pl-10 bg-gray-800/50 border-gray-700 text-white placeholder-gray-500 focus:border-blue-400"
+                    required
+                  />
+                </div>
+                </div>
+
+              {/* Password Input */}
+                <div className="space-y-2">
+                <Label htmlFor="password" className="text-gray-300">
+                  Password
+                  </Label>
+                  <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
+                    <Input
                       id="password"
-                      type={showPassword ? 'text' : 'password'}
+                    type="password"
                       placeholder="Enter your password"
                       value={password}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
+                      onChange={(e) => setPassword(e.target.value)}
+                    className="pl-10 bg-gray-800/50 border-gray-700 text-white placeholder-gray-500 focus:border-blue-400"
                       required
-                      className="bg-input border-border pr-10"
-                    />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                  >
-                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  </button>
+                  />
                 </div>
-              </div>
+                </div>
 
-              <Button
-                type="submit"
-                className="w-full bg-primary hover:bg-primary/90 text-white"
-                disabled={isLoading}
-              >
-                {isLoading ? 'Signing in...' : 'Sign In'}
-              </Button>
+              {/* Submit Button */}
+                  <Button
+                    type="submit"
+                    disabled={isLoading}
+                className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white"
+                  >
+                    {isLoading ? (
+                  <>
+                      <motion.div
+                        animate={{ rotate: 360 }}
+                        transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                      className="w-4 h-4 border-2 border-white border-t-transparent rounded-full mr-2"
+                    />
+                    Signing in...
+                  </>
+                ) : (
+                  <>
+                    Sign In
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </>
+                    )}
+                  </Button>
             </form>
 
-            {/* Demo Info */}
-            <div className="pt-4 border-t border-border">
-              <div className="text-center text-sm text-muted-foreground">
-                <p className="font-medium text-foreground mb-1">Welcome to CyberSkill.AI Demo!</p>
-                <p>Experience how we revolutionize cybersecurity education</p>
+            {/* Demo Credentials */}
+            <div className="mt-6 p-4 bg-gray-800/30 rounded-lg border border-gray-700">
+              <p className="text-xs text-gray-400 text-center mb-2">Demo Credentials:</p>
+              <div className="space-y-1 text-xs text-gray-500 text-center">
+                <p>Student: demo / password</p>
+                <p>Teacher: teacher / password</p>
+                <p>Corporate: corporate / password</p>
               </div>
-            </div>
-          </CardContent>
-        </Card>
+                </div>
+            </CardContent>
+          </Card>
 
-        {/* Features Preview */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4, duration: 0.5 }}
-          className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4 text-center"
-        >
-          <div className="p-4 bg-card/50 rounded-lg border border-border/50">
-            <GraduationCap className="h-6 w-6 text-primary mx-auto mb-2" />
-            <h3 className="font-medium text-foreground">AI-Powered Learning</h3>
-            <p className="text-xs text-muted-foreground">Personalized cybersecurity education</p>
-          </div>
-          <div className="p-4 bg-card/50 rounded-lg border border-border/50">
-            <Shield className="h-6 w-6 text-cyber-green mx-auto mb-2" />
-            <h3 className="font-medium text-foreground">Gamified Experience</h3>
-            <p className="text-xs text-muted-foreground">Learn through badges and challenges</p>
-          </div>
-          <div className="p-4 bg-card/50 rounded-lg border border-border/50">
-            <Building2 className="h-6 w-6 text-cyber-purple mx-auto mb-2" />
-            <h3 className="font-medium text-foreground">Enterprise Ready</h3>
-            <p className="text-xs text-muted-foreground">Corporate security training</p>
-          </div>
+        {/* Footer */}
+        <p className="text-center text-gray-500 text-sm mt-6">
+          CyberSkill Education Platform © 2024
+        </p>
         </motion.div>
-      </motion.div>
     </div>
   );
 } 

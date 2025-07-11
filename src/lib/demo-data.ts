@@ -280,15 +280,26 @@ export const demoCourses: Course[] = [
 
 // Demo Student Profile
 export const demoStudent: StudentProfile = {
-  ...demoUsers[0],
+  id: 'student-1',
+  name: 'Alex Chen',
+  email: 'alex.chen@school.edu',
   role: 'student',
-  grade: 'High School (11th)',
-  level: 7,
-  xp: 2480,
-  streak: 7,
-  badges: demoBadges.filter(b => b.earnedAt),
-  courses: demoCourses,
-  skillTree: demoSkillTree,
+  level: 3,
+  xp: 2750,
+  coins: 9999,
+  streak: 12,
+  achievements: ['first-login', 'week-warrior', 'quiz-master'],
+  courses: ['course-1', 'course-2'],
+  preferences: {
+    theme: 'dark',
+    notifications: true,
+    sound: true
+  },
+  badges: [
+    { id: 'first-login', name: 'Welcome Aboard', earned: true },
+    { id: 'week-warrior', name: 'Week Warrior', earned: true },
+    { id: 'quiz-master', name: 'Quiz Master', earned: false }
+  ]
 };
 
 // Demo Employees

@@ -1,399 +1,395 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { 
-  Brain, Sparkles, BookOpen, Target, Zap, Rocket,
-  Bot, Lightbulb, Star, TrendingUp, Clock, Shield,
-  PenTool, Search, FileText, MessageSquare, Code,
-  ArrowRight, Play, ChevronRight, Wand2, Cpu
+  Brain, MessageSquare, BookOpen, FileText,
+  ChevronRight, Sparkles, Play, Clock, Users,
+  Star, Target, Zap, Trophy, ArrowRight
 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Navbar } from '@/components/shared/Navbar';
+import Navbar from '@/components/shared/Navbar';
+import { StudentProfile } from '@/lib/types';
+import { demoStudent } from '@/lib/demo-data';
+
+interface AITool {
+  id: string;
+  title: string;
+  description: string;
+  icon: any;
+  route: string;
+  features: string[];
+  difficulty: 'easy' | 'medium' | 'advanced';
+  estimatedTime: string;
+  popularityScore: number;
+  newFeature?: boolean;
+}
+
+const AI_TOOLS: AITool[] = [
+  {
+    id: 'quiz-builder',
+    title: 'Smart Quiz Builder',
+    description: 'Create intelligent quizzes that adapt to your learning style and track your progress over time.',
+    icon: FileText,
+    route: '/student/tools/quiz',
+    features: [
+      'AI-generated questions',
+      'Multiple difficulty levels',
+      'Real-time feedback',
+      'Progress analytics',
+      'Custom topics'
+    ],
+    difficulty: 'easy',
+    estimatedTime: '10-15 mins',
+    popularityScore: 95,
+    newFeature: true
+  },
+  {
+    id: 'flashcards',
+    title: 'Interactive Flashcards',
+    description: 'Advanced flashcard system with spaced repetition and 3D animations for enhanced memory retention.',
+    icon: BookOpen,
+    route: '/student/tools/flashcards',
+    features: [
+      'Spaced repetition algorithm',
+      '3D flip animations',
+      'Custom card creation',
+      'Study statistics',
+      'Offline mode'
+    ],
+    difficulty: 'easy',
+    estimatedTime: '15-30 mins',
+    popularityScore: 88
+  },
+  {
+    id: 'ai-companion',
+    title: 'AI Study Companion',
+    description: 'Your personal cybersecurity tutor available 24/7 for questions, explanations, and learning guidance.',
+    icon: MessageSquare,
+    route: '/student/tools/ai-companion',
+    features: [
+      '24/7 availability',
+      'Personalized responses',
+      'Interactive conversations',
+      'Topic recommendations',
+      'Learning path guidance'
+    ],
+    difficulty: 'medium',
+    estimatedTime: 'Unlimited',
+    popularityScore: 92
+  },
+  {
+    id: 'course-builder',
+    title: 'Course Builder Pro',
+    description: 'Build comprehensive learning paths with AI assistance, tailored to your goals and skill level.',
+    icon: Brain,
+    route: '/student/tools/course-builder',
+    features: [
+      'AI-powered curriculum',
+      'Skill gap analysis',
+      'Resource recommendations',
+      'Progress milestones',
+      'Certification tracking'
+    ],
+    difficulty: 'advanced',
+    estimatedTime: '30-60 mins',
+    popularityScore: 78,
+    newFeature: true
+  }
+];
 
 export default function AIToolsPage() {
-  const router = useRouter();
+  const [user, setUser] = useState<StudentProfile | null>(null);
   const [hoveredTool, setHoveredTool] = useState<string | null>(null);
+  const router = useRouter();
 
-  const aiTools = [
-    {
-      id: 'flashcards',
-      title: 'AI Flashcards',
-      description: 'Generate intelligent flashcards from any cybersecurity topic with AI-powered explanations',
-      icon: Brain,
-      color: 'from-emerald-500 to-teal-600',
-      bgColor: 'bg-gradient-to-br from-emerald-500/10 to-teal-600/10',
-      route: '/student/tools/flashcards',
-      features: ['Smart Generation', 'Spaced Repetition', 'Progress Tracking'],
-      status: 'popular',
-      emoji: '🧠'
-    },
-    {
-      id: 'quiz',
-      title: 'AI Quiz Builder',
-      description: 'Create custom quizzes with AI-generated questions tailored to your learning level',
-      icon: Target,
-      color: 'from-blue-500 to-indigo-600',
-      bgColor: 'bg-gradient-to-br from-blue-500/10 to-indigo-600/10',
-      route: '/student/tools/quiz',
-      features: ['Custom Difficulty', 'Instant Feedback', 'Performance Analytics'],
-      status: 'featured',
-      emoji: '🎯'
-    },
-    {
-      id: 'course-builder',
-      title: 'Course Builder',
-      description: 'Build personalized learning paths with AI-curated cybersecurity content',
-      icon: BookOpen,
-      color: 'from-purple-500 to-violet-600',
-      bgColor: 'bg-gradient-to-br from-purple-500/10 to-violet-600/10',
-      route: '/student/tools/course-builder',
-      features: ['Personalized Paths', 'Progress Tracking', 'Skill Assessment'],
-      status: 'new',
-      emoji: '📚'
-    },
-    {
-      id: 'study-assistant',
-      title: 'AI Study Assistant',
-      description: 'Get instant help with cybersecurity concepts through intelligent conversation',
-      icon: Bot,
-      color: 'from-orange-500 to-red-600',
-      bgColor: 'bg-gradient-to-br from-orange-500/10 to-red-600/10',
-      route: '/student/tools/study-assistant',
-      features: ['24/7 Availability', 'Context Aware', 'Multi-language'],
-      status: 'coming-soon',
-      emoji: '🤖'
-    },
-    {
-      id: 'concept-explainer',
-      title: 'Concept Explainer',
-      description: 'Break down complex cybersecurity concepts into easy-to-understand explanations',
-      icon: Lightbulb,
-      color: 'from-amber-500 to-yellow-600',
-      bgColor: 'bg-gradient-to-br from-amber-500/10 to-yellow-600/10',
-      route: '/student/tools/concept-explainer',
-      features: ['Visual Learning', 'Step-by-step', 'Real Examples'],
-      status: 'coming-soon',
-      emoji: '💡'
-    },
-    {
-      id: 'code-analyzer',
-      title: 'Security Code Analyzer',
-      description: 'Analyze code for security vulnerabilities with AI-powered detection',
-      icon: Code,
-      color: 'from-cyan-500 to-blue-600',
-      bgColor: 'bg-gradient-to-br from-cyan-500/10 to-blue-600/10',
-      route: '/student/tools/code-analyzer',
-      features: ['Vulnerability Detection', 'Best Practices', 'Fix Suggestions'],
-      status: 'coming-soon',
-      emoji: '💻'
-    },
-    {
-      id: 'threat-simulator',
-      title: 'Threat Simulator',
-      description: 'Practice identifying and responding to cybersecurity threats in safe environment',
-      icon: Shield,
-      color: 'from-red-500 to-pink-600',
-      bgColor: 'bg-gradient-to-br from-red-500/10 to-pink-600/10',
-      route: '/student/tools/threat-simulator',
-      features: ['Safe Environment', 'Real Scenarios', 'Performance Metrics'],
-      status: 'coming-soon',
-      emoji: '🛡️'
-    },
-    {
-      id: 'study-planner',
-      title: 'AI Study Planner',
-      description: 'Create optimized study schedules based on your learning patterns and goals',
-      icon: Clock,
-      color: 'from-green-500 to-emerald-600',
-      bgColor: 'bg-gradient-to-br from-green-500/10 to-emerald-600/10',
-      route: '/student/tools/study-planner',
-      features: ['Smart Scheduling', 'Goal Tracking', 'Adaptive Planning'],
-      status: 'coming-soon',
-      emoji: '⏰'
-    }
-  ];
-
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'featured':
-        return <Badge className="bg-gradient-to-r from-primary to-cyber-blue text-white">⭐ Featured</Badge>;
-      case 'popular':
-        return <Badge className="bg-gradient-to-r from-cyber-purple to-primary text-white">🔥 Popular</Badge>;
-      case 'new':
-        return <Badge className="bg-gradient-to-r from-cyber-green to-emerald-600 text-white">✨ New</Badge>;
-      case 'coming-soon':
-        return <Badge className="bg-gradient-to-r from-slate-600 to-slate-700 text-white">🚀 Soon</Badge>;
-      default:
-        return null;
-    }
-  };
-
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1
+  useEffect(() => {
+    const currentUser = localStorage.getItem('currentUser');
+    if (currentUser) {
+        const userData = JSON.parse(currentUser);
+        if (userData.role === 'student') {
+          setUser(demoStudent);
+        } else {
+        router.push('/auth/login');
       }
+    } else {
+      router.push('/auth/login');
+    }
+  }, [router]);
+
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 flex items-center justify-center">
+        <div className="text-center">
+        <motion.div
+          animate={{ rotate: 360 }}
+            transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+            className="w-16 h-16 border-4 border-blue-400 border-t-transparent rounded-full mx-auto mb-6"
+        />
+          <p className="text-xl text-gray-400">Loading AI Learning Tools...</p>
+        </div>
+      </div>
+    );
+  }
+
+  const getDifficultyColor = (difficulty: string) => {
+    switch (difficulty) {
+      case 'easy': return 'bg-green-500/20 text-green-300 border-green-500/40';
+      case 'medium': return 'bg-yellow-500/20 text-yellow-300 border-yellow-500/40';
+      case 'advanced': return 'bg-red-500/20 text-red-300 border-red-500/40';
+      default: return 'bg-gray-500/20 text-gray-300 border-gray-500/40';
     }
   };
 
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0 }
+  const getPopularityStars = (score: number) => {
+    const stars = Math.round(score / 20);
+    return Array.from({ length: 5 }, (_, i) => (
+      <Star
+        key={i}
+        className={`h-4 w-4 ${i < stars ? 'text-yellow-400 fill-current' : 'text-gray-600'}`}
+      />
+    ));
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
-      <Navbar />
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800">
+      <Navbar user={user} />
       
-      {/* Background Effects */}
-      <div className="fixed inset-0 z-0">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-cyber-purple/5 to-cyber-blue/5" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_25%_25%,rgba(83,109,226,0.1),transparent_50%)]" />
-        <div className="cyber-grid-lg opacity-20" />
-        
-        {/* Floating AI Elements */}
-        {[...Array(8)].map((_, i) => (
-          <motion.div
-            key={i}
-            animate={{
-              y: [0, -20, 0],
-              x: [0, Math.sin(i) * 15, 0],
-              rotate: [0, 180, 360]
-            }}
-            transition={{
-              duration: 6 + i * 1.5,
-              repeat: Infinity,
-              ease: "easeInOut",
-              delay: i * 0.8
-            }}
-            className={`absolute w-1 h-1 rounded-full blur-sm ${
-              i % 4 === 0 ? 'bg-primary' : 
-              i % 4 === 1 ? 'bg-cyber-blue' : 
-              i % 4 === 2 ? 'bg-cyber-purple' : 'bg-cyber-green'
-            }`}
-            style={{
-              top: `${15 + (i * 12) % 70}%`,
-              left: `${8 + (i * 15) % 84}%`,
-            }}
-          />
-        ))}
-      </div>
-
-      <main className="relative z-10 max-w-7xl mx-auto px-4 py-12">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Header Section */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
           className="text-center mb-16"
         >
-          <div className="flex justify-center mb-6">
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 0.6 }}
+            className="flex justify-center mb-8"
+          >
+            <div className="relative p-4 bg-gradient-to-r from-blue-500/20 to-cyan-500/20 rounded-2xl border border-blue-500/30">
             <motion.div
-              whileHover={{ scale: 1.1, rotate: 10 }}
-              className="relative"
-            >
-              <div className="absolute inset-0 bg-gradient-to-r from-primary to-cyber-blue rounded-full blur-xl opacity-50 animate-pulse-slow" />
-              <div className="relative w-20 h-20 bg-gradient-to-br from-primary via-cyber-blue to-cyber-purple rounded-full flex items-center justify-center shadow-cyber-strong">
-                <Cpu className="h-10 w-10 text-white animate-pulse" />
-              </div>
-            </motion.div>
-          </div>
-
-          <h1 className="text-5xl md:text-6xl font-bold mb-6">
-            <span className="gradient-text">AI-Powered</span>{" "}
-            <span className="glow-text">Learning Tools</span>
-          </h1>
-          
-          <p className="text-xl md:text-2xl text-slate-300 max-w-3xl mx-auto leading-relaxed mb-8">
-            Supercharge your cybersecurity learning with cutting-edge AI tools designed to 
-            accelerate your understanding and boost your skills.
-          </p>
-
-          <div className="flex flex-wrap justify-center gap-6 text-slate-400">
-            {[
-              { icon: Sparkles, text: "AI-Powered" },
-              { icon: Zap, text: "Instant Results" },
-              { icon: TrendingUp, text: "Adaptive Learning" }
-            ].map(({ icon: Icon, text }, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, scale: 0 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.5 + index * 0.1 }}
-                className="flex items-center gap-2"
+                animate={{ 
+                  rotate: [0, 10, -10, 0],
+                  scale: [1, 1.05, 1]
+                }}
+                transition={{ 
+                  duration: 4,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
               >
-                <Icon className="h-5 w-5 text-primary" />
-                <span className="font-medium">{text}</span>
+                <Sparkles className="h-12 w-12 text-blue-400" />
               </motion.div>
-            ))}
-          </div>
-        </motion.div>
-
-        {/* AI Tools Grid */}
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-          className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
-        >
-          {aiTools.map((tool, index) => {
-            const Icon = tool.icon;
-            const isAvailable = !tool.status?.includes('coming-soon');
-            
-            return (
               <motion.div
-                key={tool.id}
-                variants={itemVariants}
-                whileHover={{ y: -8, scale: 1.02 }}
-                onHoverStart={() => setHoveredTool(tool.id)}
-                onHoverEnd={() => setHoveredTool(null)}
-                className="group h-full"
-              >
-                <div className={`kokonut-card h-full ${tool.bgColor} 
-                              ${hoveredTool === tool.id ? 'cyber-glow-strong' : 'hover:cyber-glow'} 
-                              transition-all duration-300 relative overflow-hidden
-                              ${isAvailable ? 'cursor-pointer' : 'cursor-default opacity-80'}`}
-                     onClick={() => isAvailable && router.push(tool.route)}
-                >
-                  {/* Status Badge */}
-                  <div className="absolute top-4 right-4 z-10">
-                    {getStatusBadge(tool.status)}
-                  </div>
+                className="absolute inset-0 bg-blue-400/20 rounded-2xl"
+              animate={{
+                  opacity: [0.3, 0.6, 0.3]
+              }}
+              transition={{
+                  duration: 2,
+                repeat: Infinity,
+                  ease: "easeInOut"
+              }}
+            />
+        </div>
+          </motion.div>
+          
+          <motion.h1
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="text-5xl font-bold text-white mb-6 tracking-tight"
+          >
+            AI Learning Tools
+          </motion.h1>
+          
+          <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+            className="text-2xl text-gray-300 max-w-4xl mx-auto leading-relaxed"
+          >
+            Supercharge your cybersecurity education with intelligent AI-powered tools designed to adapt to your learning style.
+          </motion.p>
 
-                  {/* Tool Header */}
-                  <div className="text-center mb-6">
-                    <div className="relative inline-block">
+          {/* Quick Stats */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6 }}
+            className="flex justify-center items-center space-x-8 mt-8"
+          >
+            <div className="flex items-center space-x-2 text-blue-400">
+              <Users className="h-5 w-5" />
+              <span className="text-lg font-medium">10,000+ Students</span>
+            </div>
+            <div className="flex items-center space-x-2 text-green-400">
+              <Trophy className="h-5 w-5" />
+              <span className="text-lg font-medium">95% Success Rate</span>
+              </div>
+            <div className="flex items-center space-x-2 text-yellow-400">
+              <Clock className="h-5 w-5" />
+              <span className="text-lg font-medium">24/7 Available</span>
+            </div>
+          </motion.div>
+          </motion.div>
+
+          {/* Tools Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {AI_TOOLS.map((tool, index) => (
+                <motion.div
+                  key={tool.id}
+              initial={{ opacity: 0, y: 40 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.15 }}
+                  onHoverStart={() => setHoveredTool(tool.id)}
+                  onHoverEnd={() => setHoveredTool(null)}
+              className="group"
+            >
+              <Card className="bg-gradient-to-br from-blue-500/5 to-cyan-500/5 backdrop-blur-md border-blue-500/20 hover:border-blue-400/40 transition-all duration-300 h-full overflow-hidden relative">
+                {/* New Feature Badge */}
+                {tool.newFeature && (
+                  <motion.div
+                    initial={{ scale: 0, rotate: -12 }}
+                    animate={{ scale: 1, rotate: -12 }}
+                    transition={{ delay: index * 0.15 + 0.5, type: "spring" }}
+                    className="absolute top-4 right-4 z-10"
+                  >
+                    <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 text-white border-0 px-3 py-1 transform rotate-12">
+                      New!
+                    </Badge>
+                  </motion.div>
+                )}
+
+                {/* Animated Background */}
                       <motion.div
-                        animate={{
-                          rotate: hoveredTool === tool.id ? 360 : 0,
-                          scale: hoveredTool === tool.id ? 1.1 : 1
-                        }}
-                        transition={{ duration: 0.5 }}
-                        className={`w-16 h-16 rounded-full bg-gradient-to-r ${tool.color} 
-                                   flex items-center justify-center shadow-lg mx-auto mb-4
-                                   ${hoveredTool === tool.id ? 'shadow-cyber' : ''}`}
-                      >
-                        <Icon className="h-8 w-8 text-white" />
-                      </motion.div>
-                      
-                      <div className="text-3xl absolute -bottom-2 -right-2 animate-bounce-slow">
-                        {tool.emoji}
+                  className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-cyan-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                  animate={hoveredTool === tool.id ? {
+                    background: [
+                      "linear-gradient(45deg, rgba(59, 130, 246, 0.1), rgba(6, 182, 212, 0.1))",
+                      "linear-gradient(45deg, rgba(6, 182, 212, 0.1), rgba(59, 130, 246, 0.1))",
+                      "linear-gradient(45deg, rgba(59, 130, 246, 0.1), rgba(6, 182, 212, 0.1))"
+                    ]
+                  } : {}}
+                  transition={{ duration: 2, repeat: Infinity }}
+                />
+
+                <CardHeader className="relative z-10">
+                  <div className="flex items-start justify-between mb-6">
+                        <motion.div
+                      animate={hoveredTool === tool.id ? { scale: 1.1, rotate: 5 } : { scale: 1, rotate: 0 }}
+                      transition={{ duration: 0.3 }}
+                      className="p-4 bg-gradient-to-r from-blue-500/20 to-cyan-500/20 rounded-xl border border-blue-500/30"
+                    >
+                      <tool.icon className="h-8 w-8 text-blue-400" />
+                        </motion.div>
+                        
+                    <div className="flex flex-col items-end space-y-2">
+                      <Badge variant="secondary" className={getDifficultyColor(tool.difficulty)}>
+                        {tool.difficulty}
+                            </Badge>
+                      <div className="flex items-center space-x-1">
+                        {getPopularityStars(tool.popularityScore)}
                       </div>
                     </div>
-                  </div>
-
-                  {/* Content */}
-                  <div className="space-y-4 flex-1">
-                    <div>
-                      <h3 className="text-xl font-bold text-white group-hover:text-primary transition-colors mb-2">
-                        {tool.title}
-                      </h3>
-                      
-                      <p className="text-slate-300 text-sm leading-relaxed">
-                        {tool.description}
-                      </p>
-                    </div>
-
-                    {/* Features */}
-                    <div className="space-y-2">
-                      {tool.features.map((feature, idx) => (
-                        <div key={idx} className="flex items-center text-slate-300 group-hover:text-slate-200 transition-colors">
-                          <div className={`w-1.5 h-1.5 rounded-full mr-3 bg-gradient-to-r ${tool.color}`} />
-                          <span className="text-xs font-medium">{feature}</span>
                         </div>
-                      ))}
+                        
+                  <CardTitle className="text-2xl text-white mb-3 group-hover:text-blue-300 transition-colors">
+                    {tool.title}
+                  </CardTitle>
+                  
+                  <CardDescription className="text-gray-400 text-lg leading-relaxed">
+                          {tool.description}
+                  </CardDescription>
+                    </CardHeader>
+
+                <CardContent className="relative z-10">
+                  <div className="space-y-6">
+                      {/* Features */}
+                    <div>
+                      <p className="text-base font-semibold text-blue-300 mb-4">Key Features:</p>
+                      <div className="grid grid-cols-1 gap-3">
+                        {tool.features.map((feature, idx) => (
+                          <motion.div
+                            key={idx}
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: index * 0.15 + idx * 0.1 }}
+                            className="flex items-center text-gray-300"
+                          >
+                            <motion.div
+                              animate={hoveredTool === tool.id ? { scale: 1.2 } : { scale: 1 }}
+                              className="w-2 h-2 bg-blue-400 rounded-full mr-4 flex-shrink-0"
+                            />
+                            <span className="text-base">{feature}</span>
+                          </motion.div>
+                          ))}
+                        </div>
                     </div>
-                  </div>
 
-                  {/* Action Button */}
-                  <div className="mt-6 pt-4 border-t border-white/10">
-                    {isAvailable ? (
-                      <Button 
-                        variant="ghost" 
-                        className="w-full group-hover:bg-white/10 transition-all duration-300"
+                    {/* Time and Action */}
+                    <div className="flex items-center justify-between pt-4 border-t border-gray-700">
+                      <div className="flex items-center space-x-2 text-gray-400">
+                        <Clock className="h-4 w-4" />
+                        <span className="text-sm">{tool.estimatedTime}</span>
+                      </div>
+
+                          <Button
+                        onClick={() => router.push(tool.route)}
+                        className="bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white px-6 py-2 text-base font-medium group-hover:scale-105 transition-transform duration-200"
                       >
-                        <Play className="h-4 w-4 mr-2 group-hover:scale-110 transition-transform" />
-                        <span>Launch Tool</span>
-                        <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
-                      </Button>
-                    ) : (
-                      <Button 
-                        variant="ghost" 
-                        disabled
-                        className="w-full opacity-50"
-                      >
-                        <Clock className="h-4 w-4 mr-2" />
-                        <span>Coming Soon</span>
-                      </Button>
-                    )}
-                  </div>
+                        <span>Start Learning</span>
+                        <motion.div
+                          animate={hoveredTool === tool.id ? { x: 5 } : { x: 0 }}
+                          transition={{ duration: 0.2 }}
+                        >
+                          <ArrowRight className="h-4 w-4 ml-2" />
+                        </motion.div>
+                            </Button>
+                    </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              ))}
+        </div>
 
-                  {/* Hover Glow Effect */}
-                  <motion.div
-                    animate={{
-                      opacity: hoveredTool === tool.id ? 0.3 : 0,
-                      scale: hoveredTool === tool.id ? 1 : 0.8
-                    }}
-                    className={`absolute inset-0 bg-gradient-to-r ${tool.color} rounded-2xl blur-xl -z-10`}
-                  />
-                </div>
-              </motion.div>
-            );
-          })}
-        </motion.div>
-
-        {/* Bottom CTA Section */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.8, duration: 0.8 }}
-          className="mt-20 text-center"
+        {/* Bottom CTA */}
+            <motion.div
+          initial={{ opacity: 0, y: 40 }}
+              animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.8 }}
+          className="text-center mt-16"
         >
-          <div className="glassmorphism-strong rounded-3xl p-8 md:p-12 max-w-4xl mx-auto">
-            <div className="space-y-6">
-              <div className="flex justify-center mb-4">
-                <Wand2 className="h-12 w-12 text-primary animate-pulse" />
-              </div>
-              
-              <h2 className="text-3xl md:text-4xl font-bold">
-                <span className="text-white">Ready to Level Up</span><br />
-                <span className="gradient-text">Your Cybersecurity Skills?</span>
-              </h2>
-              
-              <p className="text-lg text-slate-300 max-w-2xl mx-auto">
-                Our AI tools adapt to your learning style and pace, providing personalized 
-                experiences that accelerate your cybersecurity mastery.
+          <Card className="bg-gradient-to-r from-blue-500/10 to-cyan-500/10 border-blue-500/30 max-w-2xl mx-auto">
+            <CardContent className="p-8">
+              <h3 className="text-2xl font-bold text-white mb-4">Ready to accelerate your learning?</h3>
+              <p className="text-gray-300 text-lg mb-6">
+                Join thousands of students who have enhanced their cybersecurity skills with our AI tools.
               </p>
-              
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button 
-                  size="lg"
-                  className="kokonut-button kokonut-button-primary px-8 py-3 group"
-                  onClick={() => router.push('/student/tools/flashcards')}
-                >
-                  <Sparkles className="h-5 w-5 mr-2 group-hover:rotate-12 transition-transform" />
-                  Start with Flashcards
-                </Button>
-                
-                <Button 
-                  size="lg"
+              <div className="flex justify-center space-x-4">
+                <Button
+                  onClick={() => router.push('/student/courses')}
                   variant="outline"
-                  className="glassmorphism border-white/20 text-slate-200 hover:bg-white/10 px-8 py-3"
-                  onClick={() => router.push('/student/dashboard')}
+                  className="border-blue-500/50 text-blue-400 hover:bg-blue-500/20 text-base px-6 py-2"
                 >
-                  <TrendingUp className="h-5 w-5 mr-2" />
+                  Browse Courses
+                </Button>
+                <Button
+                  onClick={() => router.push('/student/progress')}
+                  className="bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white text-base px-6 py-2"
+                >
                   View Progress
                 </Button>
               </div>
-            </div>
-          </div>
-        </motion.div>
+            </CardContent>
+          </Card>
+            </motion.div>
       </main>
     </div>
   );
