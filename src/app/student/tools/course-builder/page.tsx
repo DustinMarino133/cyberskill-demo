@@ -125,7 +125,7 @@ export default function CourseBuilderPage() {
     } else {
       router.push('/auth/login');
     }
-  }, [router]);
+  }, [router, demoProjects]);
 
   const createNewProject = () => {
     const newProject: CourseProject = {

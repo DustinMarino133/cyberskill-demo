@@ -207,7 +207,7 @@ export default function MissionsPage() {
     const completed = missions.filter(m => m.completed).concat(completedMissionsList);
     setActiveMissions(active);
     setCompletedMissions(completed);
-  }, []);
+  }, [missions, completedMissionsList]);
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
