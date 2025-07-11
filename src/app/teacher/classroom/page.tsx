@@ -985,7 +985,7 @@ What would you like help with today?`;
                 <Button 
                   onClick={() => {
                     const updatedQuiz = { ...selectedQuiz, ...newQuiz };
-                    setQuizzes(prev => prev.map(q => q.id === updatedQuiz.id ? updatedQuiz : q));
+                    setQuizzes(prev => prev.map(q => q.id === updatedQuiz.id ? updatedQuiz : q) as any);
                     setShowQuizEditor(false);
                   }}
                   className="bg-blue-500 hover:bg-blue-600"

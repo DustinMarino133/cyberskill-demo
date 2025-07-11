@@ -713,7 +713,7 @@ export default function TeacherDashboard() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800">
-      <Navbar user={user} />
+      <Navbar user={user as any} />
 
       {/* Navigation Tabs */}
       <div className="bg-gradient-to-r from-gray-800/60 to-gray-900/60 backdrop-blur-sm border-b border-gray-700/50">
