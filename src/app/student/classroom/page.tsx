@@ -14,7 +14,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useRouter } from 'next/navigation';
-import { StudentProfile } from '@/types/student';
+import { StudentProfile } from '@/lib/types';
 
 interface Announcement {
   id: string;
@@ -73,7 +73,7 @@ interface SchoolAssignment {
 export default function ClassroomPage() {
   const [user, setUser] = useState<StudentProfile | null>(null);
   const [showAppsMenu, setShowAppsMenu] = useState(false);
-  const [currentTab, setCurrentTab] = useState<'overview' | 'assignments' | 'members'>('overview');
+  const [currentTab, setCurrentTab] = useState<'overview' | 'assignments' | 'members' | 'virtual-labs' | 'announcements' | 'calendar' | 'grades'>('overview');
   const [selectedAssignment, setSelectedAssignment] = useState<Assignment | null>(null);
   const [showAssignmentModal, setShowAssignmentModal] = useState(false);
   const router = useRouter();
@@ -744,6 +744,143 @@ export default function ClassroomPage() {
           </div>
         );
 
+      case 'virtual-labs':
+        return (
+          <div className="max-w-6xl mx-auto">
+            <div className="mb-8">
+              <h2 className="text-3xl font-bold text-white mb-3 flex items-center gap-3">
+                <FlaskConical className="h-8 w-8 text-cyan-400" />
+                Virtual Labs
+              </h2>
+              <p className="text-gray-400 text-lg">Practice cybersecurity skills in safe, simulated environments</p>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[
+                {
+                  id: 'lab-1',
+                  title: 'Network Penetration Testing',
+                  description: 'Learn ethical hacking techniques by conducting penetration tests on virtual networks. Practice vulnerability scanning, exploitation, and reporting.',
+                  difficulty: 'Hard',
+                  duration: '90 minutes',
+                  topics: ['Nmap', 'Metasploit', 'Burp Suite', 'Vulnerability Assessment'],
+                  icon: Shield,
+                  color: 'from-red-500/20 to-orange-500/20',
+                  borderColor: 'border-red-500/30',
+                  status: 'Available'
+                },
+                {
+                  id: 'lab-2', 
+                  title: 'Digital Forensics Investigation',
+                  description: 'Investigate cybercrime scenarios using real forensic tools. Analyze digital evidence, recover deleted files, and build timeline of events.',
+                  difficulty: 'Medium',
+                  duration: '75 minutes',
+                  topics: ['Autopsy', 'Volatility', 'Registry Analysis', 'Network Forensics'],
+                  icon: Search,
+                  color: 'from-blue-500/20 to-cyan-500/20',
+                  borderColor: 'border-blue-500/30',
+                  status: 'Available'
+                },
+                {
+                  id: 'lab-3',
+                  title: 'Secure Network Configuration',
+                  description: 'Configure enterprise-level network security including firewalls, VPNs, and intrusion detection systems to protect against cyber threats.',
+                  difficulty: 'Medium',
+                  duration: '60 minutes', 
+                  topics: ['pfSense', 'OpenVPN', 'Snort IDS', 'Network Segmentation'],
+                  icon: Wifi,
+                  color: 'from-green-500/20 to-emerald-500/20',
+                  borderColor: 'border-green-500/30',
+                  status: 'Available'
+                }
+              ].map((lab) => (
+                <motion.div
+                  key={lab.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  whileHover={{ scale: 1.02 }}
+                  className={`bg-gradient-to-br ${lab.color} backdrop-blur-sm border ${lab.borderColor} rounded-xl p-6 cursor-pointer transition-all duration-300 hover:shadow-xl group`}
+                >
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="w-12 h-12 bg-gradient-to-r from-gray-700/50 to-gray-600/50 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                      <lab.icon className="h-6 w-6 text-cyan-400" />
+                    </div>
+                    <div className="flex flex-col items-end gap-2">
+                      <Badge className={`${
+                        lab.difficulty === 'Hard' ? 'bg-red-500/20 text-red-300 border-red-500/30' :
+                        lab.difficulty === 'Medium' ? 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30' :
+                        'bg-green-500/20 text-green-300 border-green-500/30'
+                      }`}>
+                        {lab.difficulty}
+                      </Badge>
+                      <Badge className="bg-blue-500/20 text-blue-300 border-blue-500/30">
+                        {lab.status}
+                      </Badge>
+                    </div>
+                  </div>
+                  
+                  <h3 className="text-xl font-bold text-white mb-3 group-hover:text-cyan-300 transition-colors">
+                    {lab.title}
+                  </h3>
+                  
+                  <p className="text-gray-300 text-sm leading-relaxed mb-4">
+                    {lab.description}
+                  </p>
+                  
+                  <div className="flex items-center gap-4 mb-4 text-sm text-gray-400">
+                    <div className="flex items-center gap-1">
+                      <Clock className="h-4 w-4" />
+                      <span>{lab.duration}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <FlaskConical className="h-4 w-4" />
+                      <span>Virtual Lab</span>
+                    </div>
+                  </div>
+                  
+                  <div className="mb-6">
+                    <p className="text-xs text-gray-500 mb-2">TOOLS & TOPICS:</p>
+                    <div className="flex flex-wrap gap-1">
+                      {lab.topics.map((topic, index) => (
+                        <span key={index} className="px-2 py-1 bg-gray-700/50 text-gray-300 text-xs rounded-md">
+                          {topic}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  <Button
+                    onClick={() => router.push(`/student/labs/${lab.id}`)}
+                    className="w-full bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white font-medium group-hover:scale-105 transition-all"
+                  >
+                    <Play className="h-4 w-4 mr-2" />
+                    Start Lab
+                  </Button>
+                </motion.div>
+              ))}
+            </div>
+
+            <div className="mt-12 text-center">
+              <Card className="bg-gradient-to-r from-cyan-500/10 to-blue-500/10 border-cyan-500/30 max-w-2xl mx-auto">
+                <CardContent className="p-8">
+                  <FlaskConical className="h-12 w-12 text-cyan-400 mx-auto mb-4" />
+                  <h3 className="text-2xl font-bold text-white mb-4">More Labs Coming Soon!</h3>
+                  <p className="text-gray-300 text-lg mb-6">
+                    We're constantly adding new virtual labs to enhance your cybersecurity learning experience.
+                  </p>
+                  <Button
+                    onClick={() => router.push('/student/tools')}
+                    variant="outline"
+                    className="border-cyan-500/50 text-cyan-400 hover:bg-cyan-500/20"
+                  >
+                    Explore AI Tools
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        );
+
       case 'calendar':
         return (
           <div className="max-w-4xl mx-auto">
@@ -1026,6 +1163,7 @@ export default function ClassroomPage() {
               { id: 'overview', label: 'Overview', icon: Home },
               { id: 'announcements', label: 'Announcements', icon: Megaphone },
               { id: 'assignments', label: 'Assignments', icon: ClipboardList },
+              { id: 'virtual-labs', label: 'Virtual Labs', icon: FlaskConical },
               { id: 'calendar', label: 'Calendar', icon: Calendar },
               { id: 'grades', label: 'Grades', icon: BarChart3 },
               { id: 'members', label: 'Members', icon: Users }

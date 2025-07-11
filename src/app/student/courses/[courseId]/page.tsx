@@ -61,7 +61,58 @@ export default function CourseDetailPage() {
     if (currentUser) {
       const userData = JSON.parse(currentUser);
       if (userData.role === 'student') {
-        setUser(demoStudent);
+        setUser(userData);
+        
+        // Move loadCourseData function inside useEffect to fix dependency warning
+        const loadCourseData = () => {
+          const courses: { [key: string]: CourseData } = {
+            'cyber-101': {
+              id: 'cyber-101',
+              title: 'Cybersecurity Fundamentals',
+              description: 'Master essential cybersecurity concepts, from threat identification to implementing security best practices.',
+              instructor: 'Dr. Sarah Chen',
+              rating: 4.8,
+              students: 1245,
+              duration: '4 weeks',
+              thumbnail: '🛡️',
+              progress: 25,
+              skills: ['Password Security', 'Safe Browsing', 'Email Security', 'Digital Citizenship'],
+              modules: [
+                {
+                  id: 'm1',
+                  title: 'Introduction to Cybersecurity',
+                  duration: '45 min',
+                  completed: true,
+                  lessons: [
+                    { id: 'l1', title: 'What is Cybersecurity?', duration: '8 min', type: 'video', completed: true, locked: false },
+                    { id: 'l2', title: 'Common Threat Landscape', duration: '12 min', type: 'video', completed: true, locked: false },
+                    { id: 'l3', title: 'Basic Security Principles', duration: '10 min', type: 'reading', completed: true, locked: false },
+                    { id: 'l4', title: 'Knowledge Check', duration: '5 min', type: 'quiz', completed: false, locked: false },
+                    { id: 'l5', title: 'Security Assessment Lab', duration: '10 min', type: 'lab', completed: false, locked: false }
+                  ]
+                },
+                {
+                  id: 'm2',
+                  title: 'Password Security',
+                  duration: '60 min',
+                  completed: false,
+                  lessons: [
+                    { id: 'l6', title: 'Password Best Practices', duration: '15 min', type: 'video', completed: false, locked: false },
+                    { id: 'l7', title: 'Two-Factor Authentication', duration: '12 min', type: 'video', completed: false, locked: true }
+                  ]
+                }
+              ]
+            }
+          };
+
+          const courseData = courses[courseId] || courses['cyber-101'];
+          setCourse(courseData);
+          const firstLesson = courseData.modules[0]?.lessons[0];
+          if (firstLesson) {
+            setCurrentLesson(firstLesson);
+          }
+        };
+        
         loadCourseData();
       } else {
         router.push('/auth/login');
@@ -70,55 +121,6 @@ export default function CourseDetailPage() {
       router.push('/auth/login');
     }
   }, [router, courseId]);
-
-  const loadCourseData = () => {
-    const courses: { [key: string]: CourseData } = {
-      'cyber-101': {
-        id: 'cyber-101',
-        title: 'Cybersecurity Fundamentals',
-        description: 'Master essential cybersecurity concepts, from threat identification to implementing security best practices.',
-        instructor: 'Dr. Sarah Chen',
-        rating: 4.8,
-        students: 1245,
-        duration: '4 weeks',
-        thumbnail: '🛡️',
-        progress: 25,
-        skills: ['Password Security', 'Safe Browsing', 'Email Security', 'Digital Citizenship'],
-        modules: [
-          {
-            id: 'm1',
-            title: 'Introduction to Cybersecurity',
-            duration: '45 min',
-            completed: true,
-            lessons: [
-              { id: 'l1', title: 'What is Cybersecurity?', duration: '8 min', type: 'video', completed: true, locked: false },
-              { id: 'l2', title: 'Common Threat Landscape', duration: '12 min', type: 'video', completed: true, locked: false },
-              { id: 'l3', title: 'Basic Security Principles', duration: '10 min', type: 'reading', completed: true, locked: false },
-              { id: 'l4', title: 'Knowledge Check', duration: '5 min', type: 'quiz', completed: false, locked: false },
-              { id: 'l5', title: 'Security Assessment Lab', duration: '10 min', type: 'lab', completed: false, locked: false }
-            ]
-          },
-          {
-            id: 'm2',
-            title: 'Password Security',
-            duration: '60 min',
-            completed: false,
-            lessons: [
-              { id: 'l6', title: 'Password Best Practices', duration: '15 min', type: 'video', completed: false, locked: false },
-              { id: 'l7', title: 'Two-Factor Authentication', duration: '12 min', type: 'video', completed: false, locked: true }
-            ]
-          }
-        ]
-      }
-    };
-
-    const courseData = courses[courseId] || courses['cyber-101'];
-    setCourse(courseData);
-    const firstLesson = courseData.modules[0]?.lessons[0];
-    if (firstLesson) {
-      setCurrentLesson(firstLesson);
-    }
-  };
 
   const handleLessonSelect = (lesson: Lesson) => {
     if (!lesson.locked) {

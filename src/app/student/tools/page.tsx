@@ -80,24 +80,6 @@ const AI_TOOLS: AITool[] = [
     difficulty: 'medium',
     estimatedTime: 'Unlimited',
     popularityScore: 92
-  },
-  {
-    id: 'course-builder',
-    title: 'Course Builder Pro',
-    description: 'Build comprehensive learning paths with AI assistance, tailored to your goals and skill level.',
-    icon: Brain,
-    route: '/student/tools/course-builder',
-    features: [
-      'AI-powered curriculum',
-      'Skill gap analysis',
-      'Resource recommendations',
-      'Progress milestones',
-      'Certification tracking'
-    ],
-    difficulty: 'advanced',
-    estimatedTime: '30-60 mins',
-    popularityScore: 78,
-    newFeature: true
   }
 ];
 
@@ -330,7 +312,7 @@ export default function AIToolsPage() {
                           </motion.div>
                           ))}
                         </div>
-                    </div>
+                      </div>
 
                     {/* Time and Action */}
                     <div className="flex items-center justify-between pt-4 border-t border-gray-700">

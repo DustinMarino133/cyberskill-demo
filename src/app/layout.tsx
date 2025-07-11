@@ -22,7 +22,7 @@ export default function RootLayout({
       <body className={`${inter.className} transition-colors duration-300`}>
         <ThemeProvider>
           <ShopEffectsProvider>
-            {children}
+        {children}
           </ShopEffectsProvider>
         <Toaster
           position="top-right"

@@ -103,6 +103,9 @@ export default function FlashcardsPage() {
   const [adaptiveQuestionCount, setAdaptiveQuestionCount] = useState(0);
   const [adaptiveTopic, setAdaptiveTopic] = useState('');
   
+  // Add state for endless mode popup
+  const [showProgressPopup, setShowProgressPopup] = useState(false);
+  
   const router = useRouter();
 
   useEffect(() => {
@@ -290,6 +293,15 @@ export default function FlashcardsPage() {
       setStudyStats(prev => ({ ...prev, incorrect: prev.incorrect + 1 }));
     }
 
+    // Show popup every 10 questions
+    const newQuestionCount = adaptiveQuestionCount + 1;
+    if (newQuestionCount % 10 === 0) {
+      setShowProgressPopup(true);
+      setTimeout(() => {
+        setShowProgressPopup(false);
+      }, 3000);
+    }
+
     // Generate next question after a short delay
     setTimeout(() => {
       generateFlashcards(adaptiveTopic, true);
@@ -433,7 +445,7 @@ export default function FlashcardsPage() {
   // Library Mode - Main landing page
   if (mode === 'library') {
   return (
-      <div className="min-h-screen bg-black">
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800">
         <Navbar user={user} />
       
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -459,23 +471,23 @@ export default function FlashcardsPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8"
+            className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12"
           >
             <Card className="kokonut-card border-blue-500/30 bg-blue-500/5 hover:bg-blue-500/10 transition-all">
               <CardContent className="p-6">
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center">
-                    <Plus className="h-6 w-6 text-white" />
+                    <Sparkles className="h-6 w-6 text-white" />
                   </div>
                   <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-white mb-1">Create New Set</h3>
-                    <p className="text-slate-400 text-sm">Build custom flashcards</p>
+                    <h3 className="text-lg font-semibold text-white mb-1">Quick Study</h3>
+                    <p className="text-slate-400 text-sm">Start learning right away</p>
                   </div>
                   <Button 
                     onClick={() => setMode('setup')}
                     className="bg-blue-500 hover:bg-blue-600"
                   >
-                    Create
+                    Start
                   </Button>
                 </div>
               </CardContent>
@@ -492,7 +504,7 @@ export default function FlashcardsPage() {
                     <p className="text-slate-400 text-sm">Practice until perfect</p>
                   </div>
                   <Button 
-                    onClick={() => setMode('setup')}
+                    onClick={() => startAdaptiveMode('internet-safety')}
                     className="bg-cyan-500 hover:bg-cyan-600"
                   >
                     Start
@@ -611,7 +623,7 @@ export default function FlashcardsPage() {
   // Setup Mode
   if (mode === 'setup') {
     return (
-      <div className="min-h-screen bg-black">
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800">
         <Navbar user={user} />
 
         <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -771,7 +783,7 @@ export default function FlashcardsPage() {
   // Generation Mode
   if (mode === 'create' && isGenerating) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 flex items-center justify-center">
         <div className="text-center">
             <motion.div
             animate={{ 
@@ -827,7 +839,7 @@ export default function FlashcardsPage() {
     const progress = ((currentCardIndex + 1) / flashcardSet.cards.length) * 100;
 
     return (
-      <div className="min-h-screen bg-black">
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800">
         <Navbar user={user} />
 
         <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -1077,10 +1089,32 @@ export default function FlashcardsPage() {
     const currentCard = flashcardSet.cards[0]; // Always show the current generated card
 
     return (
-      <div className="min-h-screen bg-black">
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800">
         <Navbar user={user} />
 
         <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          {/* Progress Popup */}
+          {showProgressPopup && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8, y: -50 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.8, y: -50 }}
+              className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50"
+            >
+              <div className="bg-gradient-to-r from-blue-500/90 to-cyan-500/90 backdrop-blur-xl border border-blue-400/50 rounded-2xl p-8 text-center shadow-2xl">
+                <motion.div
+                  animate={{ rotate: [0, 360] }}
+                  transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
+                  className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4"
+                >
+                  <Brain className="h-8 w-8 text-white" />
+                </motion.div>
+                <h3 className="text-xl font-bold text-white mb-2">Hold On!</h3>
+                <p className="text-blue-100 text-sm">Tailoring your flashcards based on your results...</p>
+              </div>
+            </motion.div>
+          )}
+
           {/* Header with Adaptive Stats */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -1275,7 +1309,7 @@ export default function FlashcardsPage() {
       : 0;
 
     return (
-      <div className="min-h-screen bg-black">
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800">
         <Navbar user={user} />
 
         <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

@@ -368,7 +368,7 @@ export default function CoursesPage() {
                     <div className="flex items-center justify-between text-sm">
                       <span className="font-medium text-white">
                         Progress: {selectedBook.completedUnits}/{selectedBook.totalUnits} units
-                      </span>
+                </span>
                       <span className="text-gray-400">{selectedBook.progress}%</span>
                     </div>
                     <Progress value={selectedBook.progress} className="h-2" />
@@ -502,7 +502,7 @@ export default function CoursesPage() {
               </Button>
             </div>
           </div>
-        </div>
+          </div>
 
         {/* Books Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">

@@ -380,7 +380,7 @@ export default function ProgressPage() {
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-white mb-2">Your Achievements</h1>
           <p className="text-gray-400">Track your cybersecurity learning journey and unlock rewards</p>
-        </div>
+      </div>
 
         {/* Stats Overview */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
@@ -399,10 +399,10 @@ export default function ProgressPage() {
                   <div className="flex justify-between text-sm opacity-90">
                     <span>Progress</span>
                     <span>{levelProgress.toFixed(0)}%</span>
-                  </div>
+              </div>
                   <Progress value={levelProgress} className="h-2 bg-white/20" />
                   <p className="text-xs opacity-80">{progressData.xpToNextLevel} XP to next level</p>
-                </div>
+            </div>
               </CardContent>
             </Card>
           </motion.div>
@@ -426,7 +426,7 @@ export default function ProgressPage() {
             </Card>
           </motion.div>
 
-          <motion.div
+              <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
@@ -434,18 +434,18 @@ export default function ProgressPage() {
             <Card className="bg-gradient-to-br from-green-500 to-emerald-500 text-white">
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm font-medium opacity-90">Study Streak</CardTitle>
-              </CardHeader>
-              <CardContent>
+                  </CardHeader>
+                  <CardContent>
                 <div className="text-3xl font-bold mb-2">{progressData.streak}</div>
                 <div className="flex items-center gap-2">
                   <Flame className="h-4 w-4 opacity-80" />
                   <span className="text-sm opacity-90">Days in a row</span>
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
 
-          <motion.div
+              <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
@@ -453,17 +453,17 @@ export default function ProgressPage() {
             <Card className="bg-gradient-to-br from-orange-500 to-red-500 text-white">
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm font-medium opacity-90">Achievements</CardTitle>
-              </CardHeader>
-              <CardContent>
+                  </CardHeader>
+                  <CardContent>
                 <div className="text-3xl font-bold mb-2">{earnedAchievements.length}/{totalAchievements}</div>
                 <div className="flex items-center gap-2">
                   <Trophy className="h-4 w-4 opacity-80" />
                   <span className="text-sm opacity-90">Unlocked</span>
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-        </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            </div>
 
         {/* Achievement Filters */}
         <div className="mb-8">
@@ -488,15 +488,15 @@ export default function ProgressPage() {
               </Button>
             ))}
           </div>
-        </div>
+                      </div>
 
         {/* Achievements Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
           {filteredAchievements.map((achievement, index) => (
-            <motion.div
-              key={achievement.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
+                        <motion.div
+                          key={achievement.id}
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1 }}
               className={`group cursor-pointer ${getRarityGlow(achievement.rarity)}`}
               onClick={() => setSelectedAchievement(achievement)}
@@ -529,11 +529,11 @@ export default function ProgressPage() {
                         }`}>
                           {achievement.title}
                         </h3>
-                      </div>
+                            </div>
                       
                       <Badge className={`${getRarityColor(achievement.rarity)} mb-2 capitalize`}>
-                        {achievement.rarity}
-                      </Badge>
+                                  {achievement.rarity}
+                                </Badge>
                       
                       <p className={`text-sm mb-3 ${
                         achievement.earned ? 'text-gray-300' : 'text-gray-400'
@@ -551,7 +551,7 @@ export default function ProgressPage() {
                             value={(achievement.progress / achievement.maxProgress!) * 100} 
                             className="h-1.5 bg-gray-700" 
                           />
-                        </div>
+                          </div>
                       )}
                       
                       <div className="flex items-center justify-between">
@@ -565,22 +565,22 @@ export default function ProgressPage() {
                         )}
                       </div>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
           ))}
         </div>
 
         {/* Study Statistics */}
         <Card className="bg-gradient-to-br from-gray-800/50 to-gray-900/50 backdrop-blur-sm border-gray-700/50 mb-8">
-          <CardHeader>
+                  <CardHeader>
             <CardTitle className="text-white flex items-center gap-2">
               <BarChart3 className="h-5 w-5 text-blue-400" />
               Study Statistics
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
               <div className="text-center">
                 <div className="text-2xl font-bold text-white mb-1">
@@ -608,14 +608,14 @@ export default function ProgressPage() {
       {/* Achievement Detail Modal */}
       <AnimatePresence>
         {selectedAchievement && (
-          <motion.div
+                        <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
             onClick={() => setSelectedAchievement(null)}
           >
-            <motion.div
+                      <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
@@ -666,19 +666,19 @@ export default function ProgressPage() {
                       value={(selectedAchievement.progress / selectedAchievement.maxProgress!) * 100} 
                       className="h-2 bg-gray-700" 
                     />
-                  </div>
+            </div>
                 )}
                 
                 <div className="text-lg font-bold text-purple-400 mb-4">
                   Reward: +{selectedAchievement.points} XP
-                </div>
+          </div>
                 
                 {selectedAchievement.earned && selectedAchievement.earnedDate && (
                   <p className="text-sm text-gray-500">
                     Earned on {new Date(selectedAchievement.earnedDate).toLocaleDateString()}
                   </p>
                 )}
-              </div>
+        </div>
               
               <Button 
                 onClick={() => setSelectedAchievement(null)}

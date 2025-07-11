@@ -32,7 +32,6 @@ interface UserSettings {
     soundEnabled: boolean;
     notifications: boolean;
     language: string;
-    difficulty: 'easy' | 'medium' | 'hard';
   };
   privacy: {
     profileVisible: boolean;
@@ -56,7 +55,6 @@ export default function SettingsPage() {
       soundEnabled: true,
       notifications: true,
       language: 'English',
-      difficulty: 'medium'
     },
     privacy: {
       profileVisible: false,
@@ -184,7 +182,6 @@ export default function SettingsPage() {
           soundEnabled: true,
           notifications: true,
           language: 'English',
-          difficulty: 'medium'
         },
         privacy: {
           profileVisible: false,
@@ -503,29 +500,6 @@ export default function SettingsPage() {
                         {settings.preferences.soundEnabled ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
                       </Button>
                   </div>
-
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <Label className="text-slate-300">Difficulty Level</Label>
-                        <p className="text-sm text-slate-400">Adjust the challenge level for quizzes and activities</p>
-                      </div>
-                      <div className="flex gap-2">
-                        {(['easy', 'medium', 'hard'] as const).map((level) => (
-                          <Button
-                            key={level}
-                            variant={settings.preferences.difficulty === level ? "default" : "outline"}
-                            size="sm"
-                            onClick={() => updateSetting('preferences', 'difficulty', level)}
-                            className={settings.preferences.difficulty === level ? "bg-blue-500 hover:bg-blue-600" : "border-slate-600 text-slate-400"}
-                          >
-                            {level === 'easy' && '😊'}
-                            {level === 'medium' && '🤔'}
-                            {level === 'hard' && '🧠'}
-                            <span className="ml-1 capitalize">{level}</span>
-                          </Button>
-                        ))}
-                      </div>
-                    </div>
                   </CardContent>
                 </Card>
 

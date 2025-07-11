@@ -1,772 +1,756 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useRouter } from 'next/navigation';
+import { motion } from 'framer-motion';
 import { 
-  Users, BookOpen, Trophy, TrendingUp, AlertTriangle, Calendar, 
-  Plus, Eye, Edit, Send, BarChart3, GraduationCap, Star, Clock,
-  Target, CheckCircle, XCircle, Activity, Award, Zap, Brain,
-  Shield, Sparkles, FileText, MessageSquare, Settings, Filter,
-  Search, Bell, ChevronDown, ChevronRight, TrendingDown, Flame,
-  Crown
+  Users, BookOpen, Brain, MessageSquare, FileText,
+  Clock, ChevronRight, Target, Award, Plus,
+  Sparkles, Star, Calendar, CheckCircle,
+  AlertCircle, Timer, CalendarDays, User,
+  GraduationCap, Settings, FlaskConical, BarChart3,
+  TrendingUp, Edit, Eye, Send, Upload, Download
 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
 import { Navbar } from '@/components/shared/Navbar';
-import { demoClassroomStudents, demoAssignments, demoClassAnalytics } from '@/lib/demo-data';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, AreaChart, Area } from 'recharts';
 
-const COLORS = ['#536DE2', '#00D4FF', '#8B5CF6', '#10B981', '#F59E0B', '#EF4444'];
+interface Announcement {
+  id: string;
+  title: string;
+  content: string;
+  timestamp: string;
+  priority: 'normal' | 'important' | 'urgent';
+  pinned?: boolean;
+}
+
+interface Student {
+  id: string;
+  name: string;
+  email: string;
+  averageScore: number;
+  assignmentsCompleted: number;
+  totalAssignments: number;
+  status: 'active' | 'struggling' | 'inactive';
+}
+
+interface Assignment {
+  id: string;
+  title: string;
+  type: 'quiz' | 'lab' | 'project';
+  dueDate: string;
+  submissions: number;
+  totalStudents: number;
+  averageScore: number;
+  status: 'draft' | 'published' | 'closed';
+}
 
 export default function TeacherDashboard() {
-  const [activeTab, setActiveTab] = useState('overview');
-  const [currentUser, setCurrentUser] = useState<any>(null);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedFilter, setSelectedFilter] = useState('all');
+  const [user, setUser] = useState<any>(null);
+  const [currentTab, setCurrentTab] = useState<'overview' | 'announcements' | 'assignments' | 'student-grades'>('overview');
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const [viewDate, setViewDate] = useState(new Date(2025, 6, 1)); // July 2025
+  const router = useRouter();
+
+  // Teacher Tools Menu Items
+  const teacherToolsItems = [
+    { label: 'Create Quiz', href: '/teacher/quiz-builder', icon: FileText, color: 'text-blue-400' },
+    { label: 'AI Assistant', href: '/teacher/ai-assistant', icon: Brain, color: 'text-purple-400' },
+    { label: 'Post Announcement', href: '/teacher/announcements', icon: MessageSquare, color: 'text-green-400' },
+    { label: 'Student Grades', href: '/teacher/grades', icon: BarChart3, color: 'text-cyan-400' },
+    { label: 'Assign Lab', href: '/teacher/labs', icon: FlaskConical, color: 'text-orange-400' },
+    { label: 'Class Analytics', href: '/teacher/analytics', icon: TrendingUp, color: 'text-yellow-400' },
+    { label: 'Classroom', href: '/teacher/classroom', icon: Users, color: 'text-pink-400' },
+    { label: 'Settings', href: '/teacher/settings', icon: Settings, color: 'text-gray-400' },
+    { label: 'Upload Materials', href: '/teacher/materials', icon: Upload, color: 'text-indigo-400' }
+  ];
+
+  // Mock data for teacher dashboard
+  const announcements: Announcement[] = [
+    {
+      id: '1',
+      title: 'Network Security Quiz - Tomorrow',
+      content: 'Reminder: Network Security Assessment is due tomorrow at 11:59 PM. 18 out of 24 students have submitted.',
+      timestamp: '2 hours ago',
+      priority: 'important',
+      pinned: true
+    },
+    {
+      id: '2',
+      title: 'New Lab Materials Available',
+      content: 'Digital Forensics lab materials have been uploaded. Students can now access the virtual environment.',
+      timestamp: '1 day ago',
+      priority: 'normal'
+    },
+    {
+      id: '3',
+      title: 'Parent-Teacher Conferences',
+      content: 'Scheduled for next week. Please review student progress reports before meetings.',
+      timestamp: '2 days ago',
+      priority: 'normal'
+    }
+  ];
+
+  const students: Student[] = [
+    {
+      id: '1',
+      name: 'Alex Chen',
+      email: 'alex.chen@school.edu',
+      averageScore: 85,
+      assignmentsCompleted: 8,
+      totalAssignments: 10,
+      status: 'active'
+    },
+    {
+      id: '2',
+      name: 'Sarah Johnson', 
+      email: 'sarah.j@school.edu',
+      averageScore: 92,
+      assignmentsCompleted: 10,
+      totalAssignments: 10,
+      status: 'active'
+    },
+    {
+      id: '3',
+      name: 'Michael Rodriguez',
+      email: 'mike.r@school.edu',
+      averageScore: 67,
+      assignmentsCompleted: 6,
+      totalAssignments: 10,
+      status: 'struggling'
+    },
+    {
+      id: '4',
+      name: 'Emma Wilson',
+      email: 'emma.w@school.edu',
+      averageScore: 88,
+      assignmentsCompleted: 9,
+      totalAssignments: 10,
+      status: 'active'
+    }
+  ];
+
+  const assignments: Assignment[] = [
+    {
+      id: '1',
+      title: 'Network Security Quiz',
+      type: 'quiz',
+      dueDate: 'Tomorrow',
+      submissions: 18,
+      totalStudents: 24,
+      averageScore: 84,
+      status: 'published'
+    },
+    {
+      id: '2',
+      title: 'Firewall Configuration Lab',
+      type: 'lab',
+      dueDate: 'Feb 5',
+      submissions: 12,
+      totalStudents: 24,
+      averageScore: 78,
+      status: 'published'
+    },
+    {
+      id: '3',
+      title: 'Cryptography Project',
+      type: 'project',
+      dueDate: 'Feb 15',
+      submissions: 0,
+      totalStudents: 24,
+      averageScore: 0,
+      status: 'draft'
+    }
+  ];
 
   useEffect(() => {
-    // Get current user from localStorage
-    const user = localStorage.getItem('currentUser');
-    if (user) {
-      setCurrentUser(JSON.parse(user));
+    const currentUser = localStorage.getItem('currentUser');
+    if (currentUser) {
+      const userData = JSON.parse(currentUser);
+      if (userData.role === 'teacher') {
+        setUser({ ...userData, name: 'Sarah Johnson' });
+      } else {
+        router.push('/auth/login');
+      }
+    } else {
+      router.push('/auth/login');
     }
-  }, []);
+  }, [router]);
 
-  const tabs = [
-    { id: 'overview', label: 'Overview', icon: BarChart3, color: 'from-blue-500 to-cyan-500' },
-    { id: 'students', label: 'Students', icon: Users, color: 'from-purple-500 to-pink-500' },
-    { id: 'assignments', label: 'Assignments', icon: BookOpen, color: 'from-green-500 to-emerald-500' },
-    { id: 'analytics', label: 'Analytics', icon: TrendingUp, color: 'from-orange-500 to-red-500' },
-  ];
-
-  const quickActions = [
+  const teachingActions = [
     {
       title: 'Create Assignment',
-      description: 'Design new cybersecurity challenges',
+      description: 'Design new quizzes and labs',
       icon: Plus,
-      color: 'from-blue-500 to-purple-600',
-      action: () => console.log('Create assignment')
+      action: () => router.push('/teacher/create-assignment'),
+      color: 'from-blue-500 to-cyan-500'
     },
     {
-      title: 'AI Course Builder',
-      description: 'Generate courses with AI assistance',
+      title: 'AI Teaching Assistant',
+      description: 'Get help with curriculum planning',
       icon: Brain,
-      color: 'from-purple-500 to-pink-600',
-      action: () => console.log('AI course builder')
+      action: () => router.push('/teacher/ai-assistant'),
+      color: 'from-purple-500 to-pink-500'
     },
     {
-      title: 'Send Announcement',
-      description: 'Notify students about updates',
+      title: 'Post Announcement',
+      description: 'Update students on class news',
       icon: MessageSquare,
-      color: 'from-green-500 to-teal-600',
-      action: () => console.log('Send announcement')
+      action: () => setCurrentTab('announcements'),
+      color: 'from-green-500 to-emerald-500'
     },
     {
-      title: 'Generate Report',
-      description: 'Export class performance data',
-      icon: FileText,
-      color: 'from-orange-500 to-red-600',
-      action: () => console.log('Generate report')
+      title: 'Grade Assignments',
+      description: 'Review and grade submissions',
+      icon: CheckCircle,
+      action: () => setCurrentTab('student-grades'),
+      color: 'from-orange-500 to-red-500'
     }
   ];
 
+  const getAnnouncementColor = (priority: string) => {
+    switch (priority) {
+      case 'urgent': return 'border-red-500/50 bg-red-500/10';
+      case 'important': return 'border-orange-500/50 bg-orange-500/10';
+      default: return 'border-blue-500/20 bg-blue-500/10';
+    }
+  };
+
+  const getStudentStatusColor = (status: string) => {
+    switch (status) {
+      case 'active': return 'text-green-400';
+      case 'struggling': return 'text-red-400';
+      case 'inactive': return 'text-gray-400';
+      default: return 'text-gray-400';
+    }
+  };
+
+  const getAssignmentIcon = (type: string) => {
+    switch (type) {
+      case 'quiz': return FileText;
+      case 'lab': return FlaskConical;
+      case 'project': return Target;
+      default: return FileText;
+    }
+  };
+
+  const renderMiniCalendar = () => {
+    const month = viewDate.getMonth();
+    const year = viewDate.getFullYear();
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    const daysInMonth = lastDay.getDate();
+    const startingDayOfWeek = firstDay.getDay();
+
+    const today = new Date();
+    const isCurrentMonth = month === today.getMonth() && year === today.getFullYear();
+
+    const days = [];
+    
+    // Empty cells for days before the first day of the month
+    for (let i = 0; i < startingDayOfWeek; i++) {
+      days.push(<div key={`empty-${i}`} className="w-6 h-6"></div>);
+    }
+    
+    // Days of the month
+    for (let day = 1; day <= daysInMonth; day++) {
+      const isToday = isCurrentMonth && day === today.getDate();
+      days.push(
+        <div
+          key={day}
+          className={`w-6 h-6 text-xs flex items-center justify-center rounded cursor-pointer ${
+            isToday 
+              ? 'bg-blue-500 text-white font-bold' 
+              : 'text-gray-400 hover:text-white hover:bg-gray-700/50'
+          }`}
+        >
+          {day}
+        </div>
+      );
+    }
+
+    return (
+      <div className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 backdrop-blur-md border border-blue-500/20 rounded-xl p-4">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center space-x-2">
+            <CalendarDays className="h-4 w-4 text-blue-400" />
+            <h3 className="text-sm font-medium text-white">Class Calendar</h3>
+          </div>
+        </div>
+        
+        <div className="text-center mb-3">
+          <p className="text-xs text-gray-300 font-medium">
+            {viewDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+          </p>
+        </div>
+        
+        <div className="grid grid-cols-7 gap-1 mb-2">
+          {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day) => (
+            <div key={day} className="text-center text-xs text-gray-500 font-medium">
+              {day}
+            </div>
+          ))}
+        </div>
+        
+        <div className="grid grid-cols-7 gap-1">
+          {days}
+        </div>
+      </div>
+    );
+  };
+
   const renderOverview = () => (
-    <div className="space-y-8">
-      {/* Welcome Section */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="kokonut-card bg-gradient-to-br from-slate-800/50 via-slate-800/30 to-slate-900/50"
-      >
-        <div className="relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 via-purple-500/5 to-cyan-500/10"></div>
-          <div className="relative z-10 p-8">
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-3xl font-bold text-white mb-2">
-                  Welcome back, {currentUser?.name || 'Professor'}! 
-                  <span className="ml-2">👋</span>
-                </h1>
-                <p className="text-slate-300 text-lg">
-                  Your cybersecurity classroom is thriving. Here's today's overview.
-                </p>
-              </div>
-              <div className="hidden md:flex items-center space-x-4">
-                <div className="text-right">
-                  <div className="text-3xl font-bold text-blue-400">{demoClassAnalytics.totalStudents}</div>
-                  <div className="text-slate-400 text-sm">Total Students</div>
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      {/* Main Content */}
+      <div className="lg:col-span-2 space-y-8">
+        {/* Welcome Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-md border border-gray-700/50 rounded-xl p-6"
+        >
+              <div className="flex items-center justify-between">
+                <div>
+              <h1 className="text-2xl font-bold text-white mb-2">
+                Welcome back, Sarah Johnson! 👋
+              </h1>
+              <p className="text-gray-400">
+                Your CS6-2024 Advanced Cybersecurity class is ready for today's session.
+              </p>
                 </div>
-                <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-                  <GraduationCap className="h-8 w-8 text-white" />
+            <div className="hidden md:flex items-center space-x-4">
+              <div className="text-right">
+                <div className="text-2xl font-bold text-blue-400">24</div>
+                <div className="text-gray-400 text-sm">Students</div>
                 </div>
+              <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                <GraduationCap className="h-6 w-6 text-white" />
               </div>
             </div>
           </div>
-        </div>
-      </motion.div>
+        </motion.div>
 
-      {/* Quick Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {quickActions.map((action, index) => (
-          <motion.div
-            key={index}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.1 }}
-            whileHover={{ y: -5, scale: 1.02 }}
-            className="group cursor-pointer"
-            onClick={action.action}
-          >
-            <Card className="kokonut-card h-full border-slate-700 hover:border-slate-600 transition-all duration-300 hover:shadow-xl hover:shadow-blue-500/20">
-              <CardContent className="p-6">
-                <div className={`inline-flex items-center justify-center w-14 h-14 rounded-xl bg-gradient-to-r ${action.color} mb-4 group-hover:scale-110 transition-transform duration-300`}>
-                  <action.icon className="h-7 w-7 text-white" />
-                </div>
-                <h3 className="text-lg font-semibold text-white mb-2 group-hover:text-blue-300 transition-colors">
-                  {action.title}
-                </h3>
-                <p className="text-slate-400 text-sm leading-relaxed">
-                  {action.description}
-                </p>
-              </CardContent>
-            </Card>
-          </motion.div>
-        ))}
-      </div>
-
-      {/* Key Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {/* Recent Announcements */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
         >
-          <Card className="kokonut-card border-slate-700">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div className="space-y-2">
-                  <p className="text-sm font-medium text-slate-400">Active Students</p>
-                  <div className="flex items-baseline space-x-2">
-                    <p className="text-3xl font-bold text-white">{demoClassAnalytics.activeStudents}</p>
-                    <Badge className="bg-green-500/20 text-green-300 border-green-500/30 text-xs">
-                      +3 today
-                    </Badge>
-                  </div>
-                  <p className="text-sm text-green-400 flex items-center">
-                    <TrendingUp className="h-3 w-3 mr-1" />
-                    82% engagement rate
-                  </p>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-semibold text-white flex items-center space-x-2">
+              <MessageSquare className="h-5 w-5 text-white" />
+              <span>Recent Announcements</span>
+            </h2>
+            <Button 
+              variant="ghost" 
+              onClick={() => setCurrentTab('announcements')}
+              className="text-blue-400 hover:text-blue-300"
+            >
+              View all
+              <ChevronRight className="ml-1 h-4 w-4" />
+            </Button>
+          </div>
+          
+          <div className="space-y-3">
+            {announcements.slice(0, 3).map((announcement) => (
+              <Card 
+                key={announcement.id}
+                className={`bg-gradient-to-br backdrop-blur-md border transition-all duration-200 hover:border-blue-400/40 ${getAnnouncementColor(announcement.priority)}`}
+              >
+                <CardContent className="p-4">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center space-x-2 mb-1">
+                        <h3 className="text-sm font-semibold text-white">{announcement.title}</h3>
+                        {announcement.pinned && (
+                          <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30 text-xs">
+                            Pinned
+                          </Badge>
+                        )}
+                        <Badge className={`text-xs ${
+                          announcement.priority === 'urgent' ? 'bg-red-500/20 text-red-400 border-red-500/30' :
+                          announcement.priority === 'important' ? 'bg-orange-500/20 text-orange-400 border-orange-500/30' :
+                          'bg-blue-500/20 text-blue-400 border-blue-500/30'
+                        }`}>
+                          {announcement.priority}
+                        </Badge>
+                      </div>
+                      <p className="text-xs text-gray-300 mb-2">{announcement.content}</p>
+                      <div className="flex items-center space-x-3 text-xs text-gray-500">
+                        <span className="flex items-center space-x-1">
+                          <Clock className="h-3 w-3" />
+                          <span>{announcement.timestamp}</span>
+                        </span>
                 </div>
-                <div className="p-4 bg-gradient-to-r from-green-500/20 to-emerald-500/20 rounded-xl">
-                  <Activity className="h-8 w-8 text-green-400" />
                 </div>
               </div>
             </CardContent>
           </Card>
+            ))}
+          </div>
         </motion.div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-        >
-          <Card className="kokonut-card border-slate-700">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div className="space-y-2">
-                  <p className="text-sm font-medium text-slate-400">Average Grade</p>
-                  <div className="flex items-baseline space-x-2">
-                    <p className="text-3xl font-bold text-white">{demoClassAnalytics.averageGrade}%</p>
-                    <Badge className="bg-blue-500/20 text-blue-300 border-blue-500/30 text-xs">
-                      +2% this week
-                    </Badge>
-                  </div>
-                  <p className="text-sm text-blue-400 flex items-center">
-                    <Trophy className="h-3 w-3 mr-1" />
-                    Above class average
-                  </p>
-                </div>
-                <div className="p-4 bg-gradient-to-r from-blue-500/20 to-cyan-500/20 rounded-xl">
-                  <Trophy className="h-8 w-8 text-blue-400" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
-
+        {/* Teaching Actions */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
         >
-          <Card className="kokonut-card border-slate-700">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div className="space-y-2">
-                  <p className="text-sm font-medium text-slate-400">Assignments Due</p>
-                  <div className="flex items-baseline space-x-2">
-                    <p className="text-3xl font-bold text-white">{demoAssignments.filter(a => a.status === 'active').length}</p>
-                    <Badge className="bg-orange-500/20 text-orange-300 border-orange-500/30 text-xs">
-                      This week
-                    </Badge>
-                  </div>
-                  <p className="text-sm text-orange-400 flex items-center">
-                    <Clock className="h-3 w-3 mr-1" />
-                    Review pending
-                  </p>
-                </div>
-                <div className="p-4 bg-gradient-to-r from-orange-500/20 to-red-500/20 rounded-xl">
-                  <BookOpen className="h-8 w-8 text-orange-400" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-        >
-          <Card className="kokonut-card border-slate-700">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div className="space-y-2">
-                  <p className="text-sm font-medium text-slate-400">Course Completion</p>
-                  <div className="flex items-baseline space-x-2">
-                    <p className="text-3xl font-bold text-white">{demoClassAnalytics.coursesCompleted}</p>
-                    <Badge className="bg-purple-500/20 text-purple-300 border-purple-500/30 text-xs">
-                      +12 this month
-                    </Badge>
-                  </div>
-                  <p className="text-sm text-purple-400 flex items-center">
-                    <Award className="h-3 w-3 mr-1" />
-                    Excellent progress
-                  </p>
-                </div>
-                <div className="p-4 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-xl">
-                  <Award className="h-8 w-8 text-purple-400" />
+          <h2 className="text-xl font-semibold text-white mb-4">Teaching Tools</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {teachingActions.map((action, index) => (
+              <Card 
+                key={index}
+                className="backdrop-blur-md border-blue-500/20 cursor-pointer transition-all duration-200 hover:border-blue-400/40 bg-gradient-to-br from-blue-500/10 to-cyan-500/10"
+                onClick={action.action}
+              >
+                <CardHeader>
+                  <div className="flex items-center space-x-3">
+                    <div className={`p-2 rounded-lg bg-gradient-to-r ${action.color} bg-opacity-20`}>
+                      <action.icon className="h-6 w-6 text-white" />
+                    </div>
+                <div>
+                      <CardTitle className="text-lg text-white">
+                        {action.title}
+                      </CardTitle>
+                      <CardDescription className="text-gray-400">
+                        {action.description}
+                      </CardDescription>
                 </div>
               </div>
-            </CardContent>
+                </CardHeader>
           </Card>
+            ))}
+          </div>
         </motion.div>
       </div>
 
-      {/* Charts Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.5 }}
-        >
-          <Card className="kokonut-card border-slate-700">
-          <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle className="text-white flex items-center gap-2">
-                    <BarChart3 className="h-5 w-5 text-blue-400" />
-                    Weekly Engagement
-                  </CardTitle>
-                  <CardDescription className="text-slate-400">
-                    Student activity and study hours
-                  </CardDescription>
-                </div>
-                <Badge className="bg-blue-500/20 text-blue-300 border-blue-500/30">
-                  Live Data
-                </Badge>
-              </div>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-                <AreaChart data={demoClassAnalytics.weeklyEngagement}>
-                  <defs>
-                    <linearGradient id="studentsGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#536DE2" stopOpacity={0.3}/>
-                      <stop offset="95%" stopColor="#536DE2" stopOpacity={0}/>
-                    </linearGradient>
-                    <linearGradient id="hoursGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#00D4FF" stopOpacity={0.3}/>
-                      <stop offset="95%" stopColor="#00D4FF" stopOpacity={0}/>
-                    </linearGradient>
-                  </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                <XAxis dataKey="day" stroke="#9CA3AF" />
-                <YAxis stroke="#9CA3AF" />
-                <Tooltip 
-                  contentStyle={{ 
-                    backgroundColor: '#1F2937', 
-                    border: '1px solid #374151',
-                      borderRadius: '12px',
-                      color: '#F9FAFB',
-                      boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)'
-                  }} 
-                />
-                  <Area 
-                    type="monotone" 
-                    dataKey="students" 
-                    stroke="#536DE2" 
-                    fillOpacity={1} 
-                    fill="url(#studentsGradient)" 
-                    strokeWidth={2}
-                  />
-                  <Area 
-                    type="monotone" 
-                    dataKey="hours" 
-                    stroke="#00D4FF" 
-                    fillOpacity={1} 
-                    fill="url(#hoursGradient)" 
-                    strokeWidth={2}
-                  />
-                </AreaChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-        </motion.div>
-
+      {/* Right Sidebar */}
+      <div className="space-y-6">
+        {/* Mini Calendar */}
         <motion.div
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.6 }}
+          transition={{ delay: 0.3 }}
         >
-          <Card className="kokonut-card border-slate-700">
-          <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle className="text-white flex items-center gap-2">
-                    <Target className="h-5 w-5 text-purple-400" />
-                    Grade Distribution
-                  </CardTitle>
-                  <CardDescription className="text-slate-400">
-                    Class performance breakdown
-                  </CardDescription>
-                </div>
-                <Badge className="bg-purple-500/20 text-purple-300 border-purple-500/30">
-                  Current Term
-                </Badge>
-              </div>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie
-                  data={demoClassAnalytics.gradeDistribution}
-                  cx="50%"
-                  cy="50%"
-                  outerRadius={100}
-                    innerRadius={60}
-                    paddingAngle={5}
-                  dataKey="count"
-                  label={({ grade, percentage }) => `${grade}: ${percentage}%`}
-                    labelLine={false}
-                >
-                  {demoClassAnalytics.gradeDistribution.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                  <Tooltip 
-                    contentStyle={{ 
-                      backgroundColor: '#1F2937', 
-                      border: '1px solid #374151',
-                      borderRadius: '12px',
-                      color: '#F9FAFB'
-                    }} 
-                  />
-              </PieChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
+          {renderMiniCalendar()}
         </motion.div>
-      </div>
 
-      {/* Recent Activity */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* Class Stats */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.7 }}
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.4 }}
         >
-          <Card className="kokonut-card border-slate-700">
-          <CardHeader>
-              <CardTitle className="text-white flex items-center gap-2">
-                <Star className="h-5 w-5 text-yellow-400" />
-              Top Performers
-            </CardTitle>
-              <CardDescription className="text-slate-400">
-                Students excelling this week
-              </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {demoClassAnalytics.topPerformers.map((student, index) => (
-                  <motion.div 
-                    key={index}
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.8 + index * 0.1 }}
-                    className="flex items-center justify-between p-4 bg-slate-800/50 rounded-xl border border-slate-700/50 hover:border-slate-600/50 transition-colors"
-                  >
-                    <div className="flex items-center gap-4">
-                      <div className="relative">
-                        <div className="w-10 h-10 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full flex items-center justify-center">
-                          <span className="text-sm font-bold text-white">#{index + 1}</span>
-                        </div>
-                        {index === 0 && (
-                          <div className="absolute -top-1 -right-1 w-4 h-4 bg-yellow-400 rounded-full flex items-center justify-center">
-                            <Crown className="h-2 w-2 text-yellow-900" />
-                          </div>
-                        )}
-                    </div>
-                    <div>
-                        <div className="font-semibold text-white">{student.name}</div>
-                        <div className="text-sm text-slate-400">{student.score}% average</div>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Badge className={`${index === 0 ? 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30' : 'bg-blue-500/20 text-blue-300 border-blue-500/30'}`}>
-                        {student.improvement}
-                  </Badge>
-                      <Flame className="h-4 w-4 text-orange-400" />
-                </div>
-                  </motion.div>
-              ))}
+          <div className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 backdrop-blur-md border border-blue-500/20 rounded-xl p-4">
+            <div className="flex items-center space-x-2 mb-4">
+              <BarChart3 className="h-4 w-4 text-blue-400" />
+              <h3 className="text-sm font-medium text-white">Class Overview</h3>
             </div>
-          </CardContent>
-        </Card>
+            
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-400">Total Students:</span>
+                <span className="text-white font-medium">24</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-400">Class Average:</span>
+                <span className="text-green-400 font-medium">83%</span>
+                </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-400">Assignments:</span>
+                <span className="text-blue-400 font-medium">10 Active</span>
+                </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-400">Submissions:</span>
+                <span className="text-yellow-400 font-medium">18 Pending</span>
+              </div>
+            </div>
+          </div>
         </motion.div>
 
+        {/* Quick Links */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.8 }}
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.5 }}
         >
-          <Card className="kokonut-card border-slate-700">
-          <CardHeader>
-              <CardTitle className="text-white flex items-center gap-2">
-                <AlertTriangle className="h-5 w-5 text-red-400" />
-              Students Needing Support
-            </CardTitle>
-              <CardDescription className="text-slate-400">
-                Students who may need additional help
-              </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {demoClassAnalytics.strugglingStudents.map((student, index) => (
-                  <motion.div 
-                    key={index}
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.9 + index * 0.1 }}
-                    className="flex items-center justify-between p-4 bg-red-500/5 rounded-xl border border-red-500/20 hover:border-red-500/30 transition-colors"
-                  >
-                                          <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 bg-gradient-to-r from-red-500 to-pink-500 rounded-full flex items-center justify-center">
-                          <span className="text-sm font-bold text-white">{student.name.charAt(0)}</span>
-                        </div>
-                  <div>
-                          <div className="font-semibold text-white">{student.name}</div>
-                          <div className="text-sm text-slate-400">{student.lastActive}</div>
-                        </div>
-                  </div>
-                    <div className="flex items-center gap-2">
-                      <Badge className="bg-red-500/20 text-red-300 border-red-500/30">
-                      {student.score}%
-                    </Badge>
-                      <Button size="sm" variant="outline" className="border-red-500/30 text-red-300 hover:bg-red-500/10">
-                        Help
+          <div className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 backdrop-blur-md border border-blue-500/20 rounded-xl p-4">
+            <div className="flex items-center space-x-2 mb-4">
+              <Sparkles className="h-4 w-4 text-blue-400" />
+              <h3 className="text-sm font-medium text-white">Quick Access</h3>
+            </div>
+            
+            <div className="space-y-2">
+              <Button
+                onClick={() => setCurrentTab('student-grades')}
+                variant="ghost"
+                className="w-full justify-start text-gray-300 hover:text-white hover:bg-blue-500/20"
+              >
+                <BarChart3 className="h-4 w-4 mr-2" />
+                Student Grades
+              </Button>
+              <Button
+                onClick={() => setCurrentTab('assignments')}
+                variant="ghost"
+                className="w-full justify-start text-gray-300 hover:text-white hover:bg-blue-500/20"
+              >
+                <FileText className="h-4 w-4 mr-2" />
+                Assignments
+              </Button>
+              <Button
+                onClick={() => router.push('/teacher/classroom')}
+                variant="ghost"
+                className="w-full justify-start text-gray-300 hover:text-white hover:bg-blue-500/20"
+              >
+                <Users className="h-4 w-4 mr-2" />
+                Classroom
                     </Button>
                   </div>
-                  </motion.div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+                </div>
         </motion.div>
       </div>
     </div>
   );
 
-  const renderStudents = () => (
-    <div className="space-y-6">
-      {/* Header with Search and Filter */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between"
-      >
-        <div>
-          <h2 className="text-2xl font-bold text-white mb-2">Student Management</h2>
-          <p className="text-slate-400">Monitor progress and support your students</p>
-        </div>
-        <div className="flex gap-3">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
-            <Input
-              placeholder="Search students..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 bg-slate-800 border-slate-600 text-white placeholder-slate-400 w-64"
-            />
-          </div>
-          <Button variant="outline" className="border-slate-600 text-slate-300 hover:bg-slate-800">
-            <Filter className="h-4 w-4 mr-2" />
-            Filter
+  const renderAnnouncements = () => (
+    <div className="max-w-4xl mx-auto space-y-6">
+      <div className="flex items-center justify-between">
+        <h2 className="text-2xl font-bold text-white">Class Announcements</h2>
+        <Button className="bg-blue-500 hover:bg-blue-600">
+          <Plus className="h-4 w-4 mr-2" />
+          New Announcement
         </Button>
       </div>
-      </motion.div>
 
-      {/* Students Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {demoClassroomStudents.map((student, index) => (
-          <motion.div
-                    key={student.id}
+      {announcements.map((announcement) => (
+        <motion.div
+          key={announcement.id}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.1 }}
-            whileHover={{ y: -5 }}
-                  >
-            <Card className="kokonut-card border-slate-700 hover:border-slate-600 transition-all duration-300 hover:shadow-xl hover:shadow-blue-500/10">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                      <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-                      <span className="text-white font-bold">{student.name.charAt(0)}</span>
-                        </div>
-                        <div>
-                      <h3 className="font-semibold text-white">{student.name}</h3>
-                      <p className="text-sm text-slate-400">{student.email}</p>
-                        </div>
-                      </div>
-                  <Badge className={`${student.progress >= 80 ? 'bg-green-500/20 text-green-300 border-green-500/30' : 
-                    student.progress >= 60 ? 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30' : 
-                    'bg-red-500/20 text-red-300 border-red-500/30'}`}>
-                    {student.progress}%
-                  </Badge>
-                </div>
-                
-                <div className="space-y-3">
-                  <div>
-                    <div className="flex justify-between text-sm mb-1">
-                      <span className="text-slate-400">Course Progress</span>
-                      <span className="text-white">{student.progress}%</span>
-                    </div>
-                    <Progress value={student.progress} className="h-2" />
-                  </div>
-                  
-                  <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div>
-                      <span className="text-slate-400">Assignments</span>
-                      <div className="text-white font-semibold">{student.assignmentsCompleted}/12</div>
-                    </div>
-                      <div>
-                      <span className="text-slate-400">Last Active</span>
-                      <div className="text-white font-semibold">{student.lastActive}</div>
-                      </div>
-                      </div>
-                  
-                  <div className="flex gap-2 mt-4">
-                    <Button size="sm" variant="outline" className="flex-1 border-slate-600 text-slate-300 hover:bg-slate-800">
-                      <Eye className="h-3 w-3 mr-1" />
-                      View
-                        </Button>
-                    <Button size="sm" variant="outline" className="flex-1 border-slate-600 text-slate-300 hover:bg-slate-800">
-                      <MessageSquare className="h-3 w-3 mr-1" />
-                      Message
-                        </Button>
+          className="bg-gradient-to-br from-gray-800/50 to-gray-900/50 backdrop-blur-sm border border-gray-700/50 rounded-xl p-6"
+        >
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-xl font-bold text-white">{announcement.title}</h3>
+            <div className="flex items-center gap-2">
+              {announcement.pinned && (
+                <Badge className="bg-blue-500/20 text-blue-300 border-blue-500/30">
+                  Pinned
+                </Badge>
+              )}
+              <Badge className={`${
+                announcement.priority === 'urgent' ? 'bg-red-500/20 text-red-300 border-red-500/30' :
+                announcement.priority === 'important' ? 'bg-orange-500/20 text-orange-300 border-orange-500/30' :
+                'bg-blue-500/20 text-blue-300 border-blue-500/30'
+              }`}>
+                {announcement.priority.toUpperCase()}
+                      </Badge>
                       </div>
           </div>
-        </CardContent>
-      </Card>
-          </motion.div>
-        ))}
-      </div>
+          
+          <p className="text-gray-300 mb-4">{announcement.content}</p>
+          <p className="text-gray-500 text-sm">{announcement.timestamp}</p>
+        </motion.div>
+      ))}
     </div>
   );
 
   const renderAssignments = () => (
-    <div className="space-y-6">
+    <div className="max-w-4xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold text-white mb-2">Assignment Management</h2>
-          <p className="text-slate-400">Create, manage, and track student assignments</p>
-        </div>
-        <Button className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700">
+        <h2 className="text-2xl font-bold text-white">Assignments</h2>
+        <Button className="bg-blue-500 hover:bg-blue-600">
           <Plus className="h-4 w-4 mr-2" />
           Create Assignment
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-        {demoAssignments.map((assignment, index) => (
-          <motion.div
+      <div className="space-y-4">
+        {assignments.map((assignment) => {
+          const IconComponent = getAssignmentIcon(assignment.type);
+          return (
+            <Card 
             key={assignment.id}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.1 }}
+              className="bg-gradient-to-br from-gray-800/50 to-gray-900/50 backdrop-blur-sm border border-gray-700/50"
           >
-            <Card className="kokonut-card border-slate-700 hover:border-slate-600 transition-all duration-300">
-              <CardHeader>
+              <CardContent className="p-6">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-white text-lg">{assignment.title}</CardTitle>
-                  <Badge className={`${
-                    assignment.status === 'active' ? 'bg-green-500/20 text-green-300 border-green-500/30' :
-                    assignment.status === 'draft' ? 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30' :
-                    'bg-slate-500/20 text-slate-300 border-slate-500/30'
-                  }`}>
-                    {assignment.status}
-                  </Badge>
+                  <div className="flex items-center gap-4">
+                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                      assignment.type === 'quiz' ? 'bg-blue-500/20' : 
+                      assignment.type === 'lab' ? 'bg-green-500/20' : 'bg-purple-500/20'
+                    }`}>
+                      <IconComponent className={`h-5 w-5 ${
+                        assignment.type === 'quiz' ? 'text-blue-400' : 
+                        assignment.type === 'lab' ? 'text-green-400' : 'text-purple-400'
+                      }`} />
+                    </div>
+                  <div>
+                      <h3 className="text-white font-medium">{assignment.title}</h3>
+                      <p className="text-gray-400 text-sm">
+                        Due: {assignment.dueDate} • {assignment.submissions}/{assignment.totalStudents} submitted
+                        {assignment.averageScore > 0 && ` • Avg: ${assignment.averageScore}%`}
+                      </p>
                 </div>
-                <CardDescription className="text-slate-400">
-                  Due: {assignment.dueDate}
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <p className="text-slate-300 text-sm">{assignment.description}</p>
-                
-                <div className="flex justify-between text-sm">
-                  <span className="text-slate-400">Submissions</span>
-                  <span className="text-white">{assignment.submitted}/{assignment.totalStudents}</span>
-                </div>
-                <Progress value={(assignment.submitted / assignment.totalStudents) * 100} className="h-2" />
-
-                <div className="flex gap-2">
-                  <Button size="sm" variant="outline" className="flex-1 border-slate-600 text-slate-300 hover:bg-slate-800">
-                    <Eye className="h-3 w-3 mr-1" />
-                    View
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Badge className={`${
+                      assignment.status === 'published' ? 'bg-green-500/20 text-green-300 border-green-500/30' : 
+                      assignment.status === 'draft' ? 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30' :
+                      'bg-gray-500/20 text-gray-300 border-gray-500/30'
+                    }`}>
+                      {assignment.status}
+                    </Badge>
+                    <Button variant="ghost" size="sm">
+                      <Eye className="h-4 w-4" />
                   </Button>
-                  <Button size="sm" variant="outline" className="flex-1 border-slate-600 text-slate-300 hover:bg-slate-800">
-                    <Edit className="h-3 w-3 mr-1" />
-                    Edit
-                  </Button>
+                    <Button variant="ghost" size="sm">
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
               </CardContent>
             </Card>
-          </motion.div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
 
-  const renderAnalytics = () => (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold text-white mb-2">Advanced Analytics</h2>
-        <p className="text-slate-400">Deep insights into student performance and engagement</p>
+  const renderStudentGrades = () => (
+    <div className="max-w-6xl mx-auto space-y-6">
+      <div className="flex items-center justify-between">
+        <h2 className="text-2xl font-bold text-white">Student Grades</h2>
+        <div className="flex gap-2">
+          <Button variant="outline" className="border-gray-600 text-gray-300">
+            <Download className="h-4 w-4 mr-2" />
+            Export
+          </Button>
+        </div>
       </div>
-      
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="kokonut-card border-slate-700">
-          <CardHeader>
-            <CardTitle className="text-white">Performance Trends</CardTitle>
-            <CardDescription className="text-slate-400">
-              Track student improvement over time
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={demoClassAnalytics.performanceTrends}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                <XAxis dataKey="week" stroke="#9CA3AF" />
-                <YAxis stroke="#9CA3AF" />
-                <Tooltip 
-                  contentStyle={{ 
-                    backgroundColor: '#1F2937', 
-                    border: '1px solid #374151',
-                    borderRadius: '12px',
-                    color: '#F9FAFB'
-                  }} 
-                />
-                <Line type="monotone" dataKey="average" stroke="#536DE2" strokeWidth={3} dot={{ fill: '#536DE2', strokeWidth: 2, r: 4 }} />
-                <Line type="monotone" dataKey="top10" stroke="#00D4FF" strokeWidth={2} dot={{ fill: '#00D4FF', strokeWidth: 2, r: 3 }} />
-              </LineChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
 
-        <Card className="kokonut-card border-slate-700">
-          <CardHeader>
-            <CardTitle className="text-white">Skill Assessment</CardTitle>
-            <CardDescription className="text-slate-400">
-              Student proficiency by cybersecurity domain
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={demoClassAnalytics.skillAssessment} layout="horizontal">
-                <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                <XAxis type="number" stroke="#9CA3AF" />
-                <YAxis dataKey="skill" type="category" stroke="#9CA3AF" />
-                <Tooltip 
-                  contentStyle={{ 
-                    backgroundColor: '#1F2937', 
-                    border: '1px solid #374151',
-                    borderRadius: '12px',
-                    color: '#F9FAFB'
-                  }} 
-                />
-                <Bar dataKey="proficiency" fill="#8B5CF6" radius={[0, 4, 4, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <Card className="bg-gradient-to-br from-blue-500/20 to-cyan-500/20 border-blue-500/30">
+          <CardContent className="p-4 text-center">
+            <div className="text-2xl font-bold text-blue-400 mb-1">24</div>
+            <div className="text-white text-sm">Total Students</div>
+          </CardContent>
+        </Card>
+        <Card className="bg-gradient-to-br from-green-500/20 to-emerald-500/20 border-green-500/30">
+          <CardContent className="p-4 text-center">
+            <div className="text-2xl font-bold text-green-400 mb-1">83%</div>
+            <div className="text-white text-sm">Class Average</div>
+          </CardContent>
+        </Card>
+        <Card className="bg-gradient-to-br from-yellow-500/20 to-orange-500/20 border-yellow-500/30">
+          <CardContent className="p-4 text-center">
+            <div className="text-2xl font-bold text-yellow-400 mb-1">1</div>
+            <div className="text-white text-sm">Need Help</div>
+          </CardContent>
+        </Card>
+        <Card className="bg-gradient-to-br from-purple-500/20 to-pink-500/20 border-purple-500/30">
+          <CardContent className="p-4 text-center">
+            <div className="text-2xl font-bold text-purple-400 mb-1">95%</div>
+            <div className="text-white text-sm">Completion Rate</div>
           </CardContent>
         </Card>
       </div>
+
+      <Card className="bg-gradient-to-br from-gray-800/50 to-gray-900/50 backdrop-blur-sm border-gray-700/50">
+          <CardHeader>
+          <CardTitle className="text-white">Student Progress</CardTitle>
+          </CardHeader>
+          <CardContent>
+          <div className="space-y-4">
+            {students.map((student) => (
+              <div key={student.id} className="p-4 bg-gray-700/30 rounded-lg">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
+                      <span className="text-white font-bold text-sm">
+                        {student.name.split(' ').map(n => n[0]).join('')}
+                  </span>
+                </div>
+                    <div>
+                      <h3 className="text-white font-medium">{student.name}</h3>
+                      <p className="text-gray-400 text-sm">{student.email}</p>
+              </div>
+                </div>
+                  <div className="flex items-center gap-6">
+                    <div className="text-center">
+                      <div className="text-lg font-bold text-white">{student.averageScore}%</div>
+                      <div className="text-xs text-gray-400">Average</div>
+              </div>
+                    <div className="text-center">
+                      <div className="text-lg font-bold text-white">{student.assignmentsCompleted}/{student.totalAssignments}</div>
+                      <div className="text-xs text-gray-400">Completed</div>
+                </div>
+                    <Badge className={`${getStudentStatusColor(student.status)} border-current bg-current/10`}>
+                      {student.status}
+                    </Badge>
+              </div>
+                </div>
+              </div>
+            ))}
+            </div>
+          </CardContent>
+        </Card>
     </div>
   );
+
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-12 h-12 border-2 border-blue-400 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-400">Loading teacher dashboard...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 relative overflow-hidden">
-      {/* Background Effects */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-blue-900/10 via-transparent to-transparent"></div>
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_var(--tw-gradient-stops))] from-purple-900/10 via-transparent to-transparent"></div>
-      <div className="absolute inset-0 bg-grid-white/[0.02] bg-grid-16"></div>
-      
-      <Navbar user={currentUser} />
-      
-      <main className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Tab Navigation */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-8"
-        >
-          <div className="flex flex-wrap gap-2 p-2 bg-slate-800/50 rounded-xl border border-slate-700 backdrop-blur-sm">
-          {tabs.map((tab) => (
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800">
+      <Navbar user={user} />
+
+      {/* Navigation Tabs */}
+      <div className="bg-gradient-to-r from-gray-800/60 to-gray-900/60 backdrop-blur-sm border-b border-gray-700/50">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="flex space-x-1">
+            {[
+              { id: 'overview', label: 'Overview', icon: Target },
+              { id: 'announcements', label: 'Announcements', icon: MessageSquare },
+              { id: 'assignments', label: 'Assignments', icon: FileText },
+              { id: 'student-grades', label: 'Student Grades', icon: BarChart3 }
+            ].map((tab) => (
             <button
               key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-2 px-4 py-3 rounded-lg font-medium transition-all duration-300 ${
-                activeTab === tab.id
-                    ? `bg-gradient-to-r ${tab.color} text-white shadow-lg`
-                    : 'text-slate-400 hover:text-white hover:bg-slate-700/50'
-              }`}
+                onClick={() => setCurrentTab(tab.id as any)}
+                className={`
+                  flex items-center gap-2 px-4 py-3 border-b-2 transition-all font-medium text-sm
+                  ${currentTab === tab.id 
+                    ? 'border-blue-500 text-blue-400 bg-blue-500/10' 
+                    : 'border-transparent text-gray-400 hover:text-white hover:border-gray-600 hover:bg-gray-800/50'
+                  }
+                `}
             >
               <tab.icon className="h-4 w-4" />
               {tab.label}
             </button>
           ))}
+          </div>
         </div>
-        </motion.div>
+        </div>
 
-        {/* Tab Content */}
-        <AnimatePresence mode="wait">
-        <motion.div
-          key={activeTab}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-          transition={{ duration: 0.3 }}
-        >
-          {activeTab === 'overview' && renderOverview()}
-          {activeTab === 'students' && renderStudents()}
-          {activeTab === 'assignments' && renderAssignments()}
-          {activeTab === 'analytics' && renderAnalytics()}
-        </motion.div>
-        </AnimatePresence>
-      </main>
+      {/* Content */}
+      <div className="max-w-7xl mx-auto px-6 py-8">
+        {currentTab === 'overview' && renderOverview()}
+        {currentTab === 'announcements' && renderAnnouncements()}
+        {currentTab === 'assignments' && renderAssignments()}
+        {currentTab === 'student-grades' && renderStudentGrades()}
+      </div>
     </div>
   );
 }

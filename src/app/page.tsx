@@ -15,6 +15,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import Image from 'next/image';
 
 export default function HomePage() {
   const router = useRouter();
@@ -135,7 +136,7 @@ export default function HomePage() {
         {/* Subtle grid pattern */}
         <div 
           className="absolute inset-0 opacity-5"
-          style={{
+              style={{
             backgroundImage: `
               linear-gradient(rgba(59, 130, 246, 0.5) 1px, transparent 1px),
               linear-gradient(90deg, rgba(59, 130, 246, 0.5) 1px, transparent 1px)
@@ -149,7 +150,7 @@ export default function HomePage() {
           <motion.div
             key={i}
             className="absolute w-2 h-2 bg-blue-400/30 rounded-full"
-            style={{ 
+            style={{
               y: floatingY,
               left: `${Math.random() * 100}%`,
               top: `${Math.random() * 100}%`
@@ -217,12 +218,12 @@ export default function HomePage() {
               </div>
             </div>
           </div>
-        </div>
-        
+                    </div>
+                    
         {/* Mobile Navigation */}
         <AnimatePresence>
           {isMenuOpen && (
-            <motion.div
+                      <motion.div
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
@@ -241,7 +242,7 @@ export default function HomePage() {
                   Get Started
                 </Button>
               </div>
-            </motion.div>
+                  </motion.div>
           )}
         </AnimatePresence>
       </nav>
@@ -252,9 +253,9 @@ export default function HomePage() {
           style={{ y: heroY }}
           className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center"
         >
-          <motion.div 
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
+                <motion.div 
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
           >
             <Badge className="mb-6 bg-blue-500/20 backdrop-blur-sm text-blue-300 border-blue-500/30 px-6 py-2">
@@ -264,7 +265,7 @@ export default function HomePage() {
               Master{' '}
               <motion.span 
                 className="bg-gradient-to-r from-blue-400 via-cyan-400 to-blue-500 bg-clip-text text-transparent"
-                animate={{
+                    animate={{ 
                   backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
                 }}
                 transition={{
@@ -277,7 +278,7 @@ export default function HomePage() {
                 }}
               >
                 Cybersecurity
-              </motion.span>
+                    </motion.span>
             </h1>
             <p className="text-xl md:text-2xl text-gray-300 mb-8 max-w-4xl mx-auto leading-relaxed">
               The comprehensive platform for cybersecurity education. Learn through interactive courses, 
@@ -301,16 +302,16 @@ export default function HomePage() {
                 Watch Demo
               </Button>
             </div>
-          </motion.div>
+                </motion.div>
 
           {/* Scroll Indicator */}
-          <motion.div
+                <motion.div 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 1 }}
             className="absolute bottom-8 left-1/2 transform -translate-x-1/2"
-          >
-            <motion.div
+                >
+                  <motion.div
               animate={{ y: [0, 10, 0] }}
               transition={{ duration: 2, repeat: Infinity }}
               className="text-blue-400"
@@ -358,16 +359,19 @@ export default function HomePage() {
                 ))}
               </div>
             </motion.div>
-            <motion.div
+                      <motion.div
               initial={{ opacity: 0, x: 20 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               className="relative"
             >
-              <img 
+              <Image 
                 src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=2970&auto=format&fit=crop"
                 alt="Cybersecurity Education"
+                width={2970}
+                height={1980}
                 className="rounded-2xl shadow-2xl"
+                priority
               />
               <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-cyan-500/20 rounded-2xl"></div>
             </motion.div>
@@ -397,7 +401,7 @@ export default function HomePage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {features.map((feature, index) => (
-              <motion.div
+                        <motion.div
                 key={index}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -410,7 +414,7 @@ export default function HomePage() {
                 </div>
                 <h3 className="text-xl font-semibold text-white mb-3">{feature.title}</h3>
                 <p className="text-gray-300">{feature.description}</p>
-              </motion.div>
+                        </motion.div>
             ))}
           </div>
         </div>
@@ -429,16 +433,16 @@ export default function HomePage() {
               Our{' '}
               <span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
                 Services
-              </span>
+                      </span>
             </h2>
             <p className="text-gray-300 text-lg max-w-3xl mx-auto">
               Comprehensive cybersecurity education solutions for students, businesses, and educational institutions
             </p>
-          </motion.div>
+                  </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {services.map((service, index) => (
-              <motion.div
+                  <motion.div
                 key={index}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -462,7 +466,7 @@ export default function HomePage() {
                         </li>
                       ))}
                     </ul>
-                    <Button 
+                    <Button
                       onClick={() => router.push(service.route)}
                       className={`w-full bg-gradient-to-r ${service.gradient} hover:opacity-90 text-white border-none`}
                     >
@@ -479,27 +483,27 @@ export default function HomePage() {
       {/* Benefits Section */}
       <section id="benefits" className="py-24 relative z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div
+            <motion.div 
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-center mb-16"
+              className="text-center mb-16"
           >
             <h2 className="text-4xl font-bold text-white mb-4">
               Key{' '}
               <span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
                 Benefits
               </span>
-            </h2>
+              </h2>
             <p className="text-gray-300 text-lg max-w-3xl mx-auto">
               Discover the advantages of learning cybersecurity with CyberSkill
-            </p>
-          </motion.div>
+              </p>
+            </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {benefits.map((benefit, index) => (
-              <motion.div
-                key={index}
+                <motion.div
+                  key={index}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.2 }}
@@ -520,16 +524,16 @@ export default function HomePage() {
                     </li>
                   ))}
                 </ul>
-              </motion.div>
-            ))}
+                </motion.div>
+              ))}
+            </div>
           </div>
-        </div>
       </section>
 
       {/* Contact Section */}
       <section id="contact" className="py-24 relative z-10">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <motion.div
+            <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -575,8 +579,8 @@ export default function HomePage() {
               <a href="#" className="text-gray-400 hover:text-blue-400 transition-colors">
                 <Linkedin className="h-6 w-6" />
               </a>
-            </div>
-          </motion.div>
+              </div>
+            </motion.div>
         </div>
       </section>
 

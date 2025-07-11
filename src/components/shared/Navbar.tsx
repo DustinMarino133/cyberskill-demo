@@ -9,7 +9,7 @@ import {
   ChevronDown, Menu, X, Crown, Gem, Book, Brain,
   Palette, Target, GraduationCap, BarChart3, Monitor,
   Grid3x3, Video, BookOpen, FileText, ShoppingBag,
-  Award, ClipboardList, MessageSquare, Sparkles
+  Award, ClipboardList, MessageSquare, Sparkles, FlaskConical, TrendingUp
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -133,17 +133,25 @@ function NavbarComponent({ user: propUser, notifications = 0 }: NavbarProps = {}
     loadUserData();
   }, [propUser]);
 
-  // Learning Hub items (AI Tools and Learning Resources)
-  const learningHubItems = [
+  // Learning Hub items (context-aware for teachers vs students)
+  const learningHubItems = user?.role === 'teacher' ? [
+    { label: 'AI Assistant', href: '/teacher/ai-assistant', icon: MessageSquare, description: 'AI teaching assistant for curriculum help' },
+    { label: 'Create Quiz', href: '/teacher/quiz-builder', icon: FileText, description: 'Design quizzes and assessments' },
+    { label: 'Lab Library', href: '/teacher/labs', icon: Brain, description: 'Assign virtual labs to students' },
+    { label: 'Teaching Tools', href: '/teacher/tools', icon: Sparkles, description: 'Browse all teaching resources' }
+  ] : [
     { label: 'AI Companion', href: '/student/tools/ai-companion', icon: MessageSquare, description: 'Chat with AI tutor for personalized help' },
     { label: 'Quiz Builder', href: '/student/tools/quiz', icon: FileText, description: 'Create AI-powered practice quizzes' },
     { label: 'Flashcards', href: '/student/tools/flashcards', icon: Brain, description: 'Interactive 3D study flashcards' },
-    { label: 'Course Builder', href: '/student/tools/course-builder', icon: GraduationCap, description: 'Build custom learning courses' },
     { label: 'All Tools', href: '/student/tools', icon: Sparkles, description: 'Browse all AI learning tools' }
   ];
 
-  // Cyber Shop items (Shop, Achievements, Missions)
-  const cosmeticItems = [
+  // Shop/Tools items (context-aware for teachers vs students)
+  const cosmeticItems = user?.role === 'teacher' ? [
+    { label: 'Student Grades', href: '/teacher/grades', icon: BarChart3, description: 'View and manage student grades' },
+    { label: 'Class Analytics', href: '/teacher/analytics', icon: TrendingUp, description: 'Analyze class performance and trends' },
+    { label: 'Announcements', href: '/teacher/announcements', icon: MessageSquare, description: 'Post updates and announcements' }
+  ] : [
     { label: 'Shop', href: '/student/shop', icon: ShoppingBag, description: 'Buy themes, cursors, and upgrades' },
     { label: 'Achievements', href: '/student/progress', icon: Award, description: 'View your badges and progress' },
     { label: 'Missions', href: '/student/missions', icon: Target, description: 'Complete daily and weekly challenges' }
@@ -177,8 +185,18 @@ function NavbarComponent({ user: propUser, notifications = 0 }: NavbarProps = {}
     }
   ];
 
-  // Universal Apps Menu items (replaced Calculator with Classroom)
-  const appMenuItems: AppMenuItem[] = [
+  // Universal Apps Menu items (context-aware for teachers vs students)
+  const appMenuItems: AppMenuItem[] = user?.role === 'teacher' ? [
+    { label: 'Classroom', href: '/teacher/classroom', icon: Monitor, color: 'text-orange-400' },
+    { label: 'AI Assistant', href: '/teacher/ai-assistant', icon: Brain, color: 'text-purple-400' },
+    { label: 'Create Quiz', href: '/teacher/quiz-builder', icon: FileText, color: 'text-blue-400' },
+    { label: 'Student Grades', href: '/teacher/grades', icon: BarChart3, color: 'text-green-400' },
+    { label: 'Dashboard', href: '/teacher/dashboard', icon: Target, color: 'text-cyan-400' },
+    { label: 'Announcements', href: '/teacher/announcements', icon: MessageSquare, color: 'text-pink-400' },
+    { label: 'Lab Library', href: '/teacher/labs', icon: FlaskConical, color: 'text-yellow-400' },
+    { label: 'Analytics', href: '/teacher/analytics', icon: TrendingUp, color: 'text-indigo-400' },
+    { label: 'Settings', href: '/teacher/settings', icon: Settings, color: 'text-gray-400' }
+  ] : [
     { label: 'Videos', href: '/student/courses', icon: Video, color: 'text-red-400' },
     { label: 'AI Companion', href: '/student/tools/ai-companion', icon: Brain, color: 'text-purple-400' },
     { label: 'Quiz Builder', href: '/student/tools/quiz', icon: FileText, color: 'text-blue-400' },
@@ -210,9 +228,10 @@ function NavbarComponent({ user: propUser, notifications = 0 }: NavbarProps = {}
       case 'teacher':
         return [
           ...baseItems,
-          { label: 'Classes', href: '/teacher/classes', icon: GraduationCap },
-          { label: 'Students', href: '/teacher/students', icon: User },
-          { label: 'Analytics', href: '/teacher/analytics', icon: BarChart3 }
+          { label: 'Classroom', href: '/teacher/classroom', icon: Monitor },
+          { label: 'Teaching Hub', href: '#', icon: Brain, hasDropdown: true, dropdownType: 'learning' },
+          { label: 'Teacher Tools', href: '#', icon: Palette, hasDropdown: true, dropdownType: 'cosmetic' },
+          { label: selectedClass?.classCode || 'CS6-2024', href: '/teacher/classroom', icon: Monitor }
         ];
       case 'corporate':
         return [
@@ -375,6 +394,135 @@ function NavbarComponent({ user: propUser, notifications = 0 }: NavbarProps = {}
     );
   };
 
+  const renderProfilePopup = () => {
+    if (!isProfileOpen) return null;
+
+    return (
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95, y: -10 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.95, y: -10 }}
+        className="absolute right-0 top-full mt-3 w-80 bg-gradient-to-br from-slate-900/95 to-slate-800/95 backdrop-blur-xl border border-blue-500/30 rounded-2xl shadow-2xl overflow-hidden z-50"
+      >
+        {/* Header with Profile Picture */}
+        <div className="relative px-6 py-6 bg-gradient-to-r from-blue-500/20 to-cyan-500/20 border-b border-gray-700/50">
+          <div className="flex items-center space-x-4">
+            <div className="relative">
+              <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full flex items-center justify-center ring-4 ring-blue-500/20">
+                <User className="h-8 w-8 text-white" />
+              </div>
+              <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 rounded-full border-2 border-slate-800"></div>
+            </div>
+            <div className="flex-1">
+              <h3 className="text-lg font-bold text-white">{user?.name || 'Sarah Johnson'}</h3>
+              <p className="text-sm text-blue-300">@{(user?.name || 'Sarah Johnson').toLowerCase().replace(' ', '')}</p>
+              <p className="text-xs text-gray-400">{selectedClass?.classCode || (user?.role === 'teacher' ? 'CS6-2024' : 'ACD12-2024')} • Advanced Cybersecurity</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Teacher Label OR Student Stats */}
+        {user?.role === 'teacher' ? (
+          <div className="px-6 py-4 border-b border-gray-700/50">
+            <div className="flex items-center justify-center">
+              <div className="flex items-center gap-3 px-4 py-3 bg-gradient-to-r from-purple-500/20 to-blue-500/20 border border-purple-500/30 rounded-xl">
+                <GraduationCap className="h-5 w-5 text-purple-400" />
+                <div className="text-center">
+                  <div className="text-sm font-bold text-white">Teacher</div>
+                  <div className="text-xs text-purple-300">Advanced Cybersecurity</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <>
+            {/* Stats Section */}
+            <div className="px-6 py-4 border-b border-gray-700/50">
+              <div className="grid grid-cols-3 gap-4 text-center">
+                <div>
+                  <div className="text-xl font-bold text-blue-400">Lv.{userLevel}</div>
+                  <div className="text-xs text-gray-400">Level</div>
+                </div>
+                <div>
+                  <div className="text-xl font-bold text-cyan-400">{userXP.toLocaleString()}</div>
+                  <div className="text-xs text-gray-400">XP</div>
+                </div>
+                <div>
+                  <div className="text-xl font-bold text-yellow-400">{userCoins.toLocaleString()}</div>
+                  <div className="text-xs text-gray-400">Coins</div>
+                </div>
+              </div>
+              
+              {/* XP Progress Bar */}
+              <div className="mt-4">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs text-gray-400">Progress to Level {userLevel + 1}</span>
+                  <span className="text-xs text-gray-400">{Math.round(xpProgress)}%</span>
+                </div>
+                <div className="w-full h-2 bg-gray-700 rounded-full overflow-hidden">
+                  <div 
+                    className="h-full bg-gradient-to-r from-blue-400 to-cyan-400 transition-all duration-300"
+                    style={{ width: `${xpProgress}%` }}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Profile Badges */}
+            <div className="px-6 py-4 border-b border-gray-700/50">
+              <h4 className="text-sm font-medium text-white mb-3 flex items-center">
+                <Award className="h-4 w-4 mr-2 text-yellow-400" />
+                Profile Badges
+              </h4>
+              <div className="grid grid-cols-4 gap-2">
+                <div className="flex flex-col items-center p-2 bg-yellow-500/10 rounded-lg border border-yellow-500/20">
+                  <Crown className="h-5 w-5 text-yellow-400 mb-1" />
+                  <span className="text-xs text-yellow-300">Elite</span>
+                </div>
+                <div className="flex flex-col items-center p-2 bg-blue-500/10 rounded-lg border border-blue-500/20">
+                  <Shield className="h-5 w-5 text-blue-400 mb-1" />
+                  <span className="text-xs text-blue-300">Guardian</span>
+                </div>
+                <div className="flex flex-col items-center p-2 bg-green-500/10 rounded-lg border border-green-500/20">
+                  <Target className="h-5 w-5 text-green-400 mb-1" />
+                  <span className="text-xs text-green-300">Achiever</span>
+                </div>
+                <div className="flex flex-col items-center p-2 bg-purple-500/10 rounded-lg border border-purple-500/20">
+                  <Brain className="h-5 w-5 text-purple-400 mb-1" />
+                  <span className="text-xs text-purple-300">Scholar</span>
+                </div>
+              </div>
+            </div>
+          </>
+        )}
+
+        {/* Quick Actions */}
+        <div className="px-6 py-4">
+          <div className="space-y-2">
+            <button
+              onClick={() => {
+                router.push(user?.role === 'teacher' ? '/teacher/settings' : '/student/settings');
+                setIsProfileOpen(false);
+              }}
+              className="w-full flex items-center space-x-3 px-3 py-2 text-gray-300 hover:text-white hover:bg-blue-500/20 transition-colors rounded-lg"
+            >
+              <Settings className="h-4 w-4" />
+              <span className="text-sm">Settings</span>
+            </button>
+            
+            <button
+              onClick={handleLogout}
+              className="w-full flex items-center space-x-3 px-3 py-2 text-gray-300 hover:text-red-400 hover:bg-red-500/10 transition-colors rounded-lg"
+            >
+              <LogOut className="h-4 w-4" />
+              <span className="text-sm">Sign out</span>
+            </button>
+          </div>
+        </div>
+      </motion.div>
+    );
+  };
+
   if (isLoading) {
     return (
       <nav className="bg-black/20 backdrop-blur-xl border-b border-white/10 sticky top-0 z-50">
@@ -396,13 +544,13 @@ function NavbarComponent({ user: propUser, notifications = 0 }: NavbarProps = {}
 
   return (
     <nav className="bg-black/20 backdrop-blur-xl border-b border-white/10 sticky top-0 z-50">
-      <div className="max-w-[90rem] mx-auto px-6 sm:px-8 lg:px-12">
+      <div className="max-w-[95rem] mx-auto px-8 sm:px-10 lg:px-16">
         <div className="flex items-center justify-between h-20">
           {/* Logo */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
-            className="flex items-center space-x-4 cursor-pointer"
+            className="flex items-center space-x-4 cursor-pointer min-w-[200px]"
             onClick={() => router.push('/')}
             whileHover={{ scale: 1.02 }}
           >
@@ -410,13 +558,15 @@ function NavbarComponent({ user: propUser, notifications = 0 }: NavbarProps = {}
               <Shield className="h-7 w-7 text-blue-400" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-white tracking-wide">CyberSkill</h1>
-              <p className="text-sm text-gray-400 capitalize">{user?.role}</p>
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
+                CyberSkill
+              </h1>
+              <p className="text-xs text-gray-400 capitalize">{user?.role || 'Student'}</p>
             </div>
           </motion.div>
 
-          {/* Desktop Navigation - Centered */}
-          <div className="hidden md:flex items-center space-x-6 flex-1 justify-center">
+          {/* Desktop Navigation - Better Centered */}
+          <div className="hidden md:flex items-center space-x-4 flex-1 justify-center ml-8">
             {navItems.map((item, index) => (
               <div key={item.label} className="relative">
                 {item.hasDropdown ? (
@@ -436,7 +586,7 @@ function NavbarComponent({ user: propUser, notifications = 0 }: NavbarProps = {}
                       initial={{ opacity: 0, y: -10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: index * 0.1 }}
-                      className="flex items-center space-x-2 text-gray-300 hover:text-white transition-all duration-200 px-4 py-3 rounded-xl hover:bg-blue-500/10 whitespace-nowrap"
+                      className="flex items-center space-x-2 text-gray-300 hover:text-white transition-all duration-200 px-3 py-2 rounded-xl hover:bg-blue-500/10 whitespace-nowrap"
                     >
                       <item.icon className="h-5 w-5" />
                       <span className="text-sm font-medium">{item.label}</span>
@@ -454,7 +604,7 @@ function NavbarComponent({ user: propUser, notifications = 0 }: NavbarProps = {}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.1 }}
                     onClick={() => router.push(item.href)}
-                    className="flex items-center space-x-2 text-gray-300 hover:text-white transition-all duration-200 px-4 py-3 rounded-xl hover:bg-blue-500/10 whitespace-nowrap"
+                    className="flex items-center space-x-2 text-gray-300 hover:text-white transition-all duration-200 px-3 py-2 rounded-xl hover:bg-blue-500/10 whitespace-nowrap"
                   >
                     <item.icon className="h-5 w-5" />
                     <span className="text-sm font-medium">{item.label}</span>
@@ -465,20 +615,20 @@ function NavbarComponent({ user: propUser, notifications = 0 }: NavbarProps = {}
           </div>
 
           {/* User Info & Profile */}
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-3">
             {/* User Stats for Students */}
             {user?.role === 'student' && (
-              <div className="hidden lg:flex items-center space-x-3">
+              <div className="hidden lg:flex items-center space-x-2">
                 {/* Coins */}
                 <div className="flex items-center space-x-2 px-3 py-2 bg-yellow-500/10 border border-yellow-500/20 rounded-xl">
-                  <Gem className="h-5 w-5 text-yellow-400" />
+                  <Gem className="h-4 w-4 text-yellow-400" />
                   <span className="text-sm font-medium text-yellow-400">{userCoins.toLocaleString()}</span>
                 </div>
                 
                 {/* Level & XP */}
-                <div className="flex items-center space-x-3 px-3 py-2 bg-gradient-to-r from-blue-500/10 to-cyan-500/10 border border-blue-500/20 rounded-xl min-w-[140px]">
+                <div className="flex items-center space-x-2 px-3 py-2 bg-gradient-to-r from-blue-500/10 to-cyan-500/10 border border-blue-500/20 rounded-xl min-w-[120px]">
                   <div className="flex items-center space-x-2">
-                    <Crown className="h-5 w-5 text-blue-400" />
+                    <Crown className="h-4 w-4 text-blue-400" />
                     <span className="text-sm font-medium text-blue-400">Lv.{userLevel}</span>
                   </div>
                   <div className="flex-1 h-2 bg-gray-700 rounded-full overflow-hidden">
@@ -497,10 +647,10 @@ function NavbarComponent({ user: propUser, notifications = 0 }: NavbarProps = {}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setIsAppsMenuOpen(!isAppsMenuOpen)}
-                className="relative p-3 text-gray-400 hover:text-white transition-colors rounded-xl hover:bg-blue-500/10"
+                className="relative p-2 text-gray-400 hover:text-white transition-colors rounded-xl hover:bg-blue-500/10"
                 title="Quick Access"
               >
-                <Grid3x3 className="h-6 w-6" />
+                <Grid3x3 className="h-5 w-5" />
               </motion.button>
 
               <AnimatePresence>
@@ -514,9 +664,9 @@ function NavbarComponent({ user: propUser, notifications = 0 }: NavbarProps = {}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
-                className="relative p-3 text-gray-400 hover:text-white transition-colors rounded-xl hover:bg-blue-500/10"
+                className="relative p-2 text-gray-400 hover:text-white transition-colors rounded-xl hover:bg-blue-500/10"
               >
-                <Bell className="h-6 w-6" />
+                <Bell className="h-5 w-5" />
                 <div className="absolute -top-1 -right-1 h-4 w-4 bg-red-500 rounded-full flex items-center justify-center">
                   <span className="text-xs text-white font-bold">3</span>
                 </div>
@@ -535,69 +685,18 @@ function NavbarComponent({ user: propUser, notifications = 0 }: NavbarProps = {}
                 onClick={() => setIsProfileOpen(!isProfileOpen)}
                 className="flex items-center space-x-3 p-2 text-gray-300 hover:text-white transition-colors rounded-xl hover:bg-blue-500/10"
               >
-                <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full flex items-center justify-center">
+                <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full flex items-center justify-center border-2 border-blue-400/30 shadow-lg">
                   <User className="h-5 w-5 text-white" />
                 </div>
-                <div className="hidden md:block text-left">
-                  <p className="text-sm font-medium text-white">{user?.name}</p>
-                  <p className="text-xs text-gray-400">{user?.email}</p>
+                <div className="hidden md:block text-left min-w-[140px]">
+                  <p className="text-sm font-medium text-white">{user?.name || 'Sarah Johnson'}</p>
+                  <p className="text-xs text-gray-400">{selectedClass?.classCode || (user?.role === 'teacher' ? 'CS6-2024' : 'ACD12-2024')} • Advanced Cybersecurity</p>
                 </div>
-                <ChevronDown className="h-4 w-4 hidden md:block" />
+                <ChevronDown className="h-3 w-3 hidden md:block text-gray-400" />
               </motion.button>
 
               <AnimatePresence>
-                {isProfileOpen && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    className="absolute right-0 top-full mt-1 w-64 bg-black/95 backdrop-blur-xl border border-blue-500/30 rounded-xl shadow-2xl overflow-hidden"
-                  >
-                    <div className="px-4 py-3 border-b border-gray-700">
-                      <div className="flex items-center space-x-3">
-                        <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full flex items-center justify-center">
-                          <User className="h-5 w-5 text-white" />
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium text-white">{user?.name}</p>
-                          <p className="text-xs text-gray-400">{user?.email}</p>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <button
-                      onClick={() => {
-                        router.push('/student/profile');
-                        setIsProfileOpen(false);
-                      }}
-                      className="w-full flex items-center space-x-3 px-4 py-3 text-gray-300 hover:text-white hover:bg-blue-500/20 transition-colors"
-                    >
-                      <User className="h-4 w-4" />
-                      <span className="text-sm">Profile</span>
-                    </button>
-                    
-                    <button
-                      onClick={() => {
-                        router.push('/student/settings');
-                        setIsProfileOpen(false);
-                      }}
-                      className="w-full flex items-center space-x-3 px-4 py-3 text-gray-300 hover:text-white hover:bg-blue-500/20 transition-colors"
-                    >
-                      <Settings className="h-4 w-4" />
-                      <span className="text-sm">Settings</span>
-                    </button>
-                    
-                    <div className="border-t border-gray-700">
-                      <button
-                        onClick={handleLogout}
-                        className="w-full flex items-center space-x-3 px-4 py-3 text-gray-300 hover:text-red-400 hover:bg-red-500/10 transition-colors"
-                      >
-                        <LogOut className="h-4 w-4" />
-                        <span className="text-sm">Sign out</span>
-                      </button>
-                    </div>
-                  </motion.div>
-                )}
+                {isProfileOpen && renderProfilePopup()}
               </AnimatePresence>
             </div>
 
@@ -608,7 +707,7 @@ function NavbarComponent({ user: propUser, notifications = 0 }: NavbarProps = {}
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               className="md:hidden p-2 text-gray-400 hover:text-white transition-colors"
             >
-              {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+              {isMenuOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
             </motion.button>
           </div>
         </div>

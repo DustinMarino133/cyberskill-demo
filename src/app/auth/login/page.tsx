@@ -163,7 +163,7 @@ export default function LoginPage() {
                     className="pl-10 bg-gray-800/50 border-gray-700 text-white placeholder-gray-500 focus:border-blue-400"
                       required
                   />
-                </div>
+                  </div>
                 </div>
 
               {/* Submit Button */}

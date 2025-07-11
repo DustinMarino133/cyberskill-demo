@@ -11,7 +11,7 @@ import {
   AlertCircle, XCircle, Timer, 
   CalendarDays, User, Users, MessageSquare,
   GraduationCap, ShoppingBag, Palette, Book, ChevronLeft,
-  Video, Monitor, BarChart3, Settings
+  Video, Monitor, BarChart3, Settings, FlaskConical
 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -178,7 +178,7 @@ export default function StudentDashboard() {
     }
   };
 
-  // Work to do items (assignments with deadlines)
+  // Work to do items (only quizzes and labs)
   const workItems: WorkItem[] = [
     {
       id: '1',
@@ -187,34 +187,34 @@ export default function StudentDashboard() {
       type: 'quiz',
       deadline: 'Tomorrow 11:59 PM',
       status: 'due_soon',
-      priority: 'high'
+      priority: 'medium'
     },
     {
       id: '2',
-      title: 'Cryptography Project',
-      course: 'Introduction to Cryptography',
-      type: 'project',
-      deadline: 'Jan 25, 2024',
-      status: 'upcoming',
+      title: 'Firewall Configuration Lab',
+      course: 'Network Defense',
+      type: 'quiz',
+      deadline: 'Feb 5, 2024',
+      status: 'upcoming', 
       priority: 'medium'
     },
     {
       id: '3',
-      title: 'Security Policy Essay',
-      course: 'Web Security',
-      type: 'assignment',
-      deadline: 'Yesterday',
-      status: 'overdue',
-      priority: 'high'
+      title: 'Cryptography Quiz',
+      course: 'Advanced Cryptography',
+      type: 'quiz',
+      deadline: 'Feb 8, 2024',
+      status: 'upcoming',
+      priority: 'medium'
     },
     {
       id: '4',
-      title: 'Chapter 5 Reading',
-      course: 'Network Security Basics',
-      type: 'reading',
-      deadline: 'Next Week',
+      title: 'Penetration Testing Lab',
+      course: 'Ethical Hacking',
+      type: 'quiz',
+      deadline: 'Feb 12, 2024',
       status: 'upcoming',
-      priority: 'low'
+      priority: 'medium'
     }
   ];
 
@@ -252,18 +252,14 @@ export default function StudentDashboard() {
   ];
 
   const getWorkItemColor = (status: string, priority: string) => {
-    if (status === 'overdue') return 'border-red-500/50 bg-red-500/10';
-    if (status === 'due_soon' && priority === 'high') return 'border-orange-500/50 bg-orange-500/10';
-    if (status === 'due_soon') return 'border-yellow-500/50 bg-yellow-500/10';
-    return 'border-blue-500/20 bg-blue-500/10';
+    // Use consistent blue theme for all work items
+    return 'border-blue-500/30 bg-blue-500/10';
   };
 
   const getWorkItemIcon = (type: string) => {
     switch (type) {
       case 'quiz': return FileText;
-      case 'assignment': return BookOpen;
-      case 'project': return Target;
-      case 'reading': return Book;
+      case 'lab': return FlaskConical;
       default: return FileText;
     }
   };
@@ -489,7 +485,7 @@ export default function StudentDashboard() {
                 </h2>
                 <Button 
                   variant="ghost" 
-                  onClick={() => router.push('/student/assignments')}
+                  onClick={() => router.push('/student/classroom')}
                   className="text-blue-400 hover:text-blue-300"
                 >
                   View all
@@ -512,21 +508,6 @@ export default function StudentDashboard() {
                             <div className="flex-1">
                               <div className="flex items-center space-x-2 mb-1">
                                 <h3 className="text-sm font-semibold text-white">{item.title}</h3>
-                                {item.priority === 'high' && (
-                                  <Badge className="bg-red-500/20 text-red-400 border-red-500/30 text-xs">
-                                    High Priority
-                                  </Badge>
-                                )}
-                                {item.status === 'overdue' && (
-                                  <Badge className="bg-red-500/20 text-red-400 border-red-500/30 text-xs">
-                                    Overdue
-                                  </Badge>
-                                )}
-                                {item.status === 'due_soon' && (
-                                  <Badge className="bg-orange-500/20 text-orange-400 border-orange-500/30 text-xs">
-                                    Due Soon
-                                  </Badge>
-                                )}
                               </div>
                               <p className="text-xs text-gray-400 mb-2">{item.course}</p>
                               <div className="flex items-center space-x-3 text-xs text-gray-500">

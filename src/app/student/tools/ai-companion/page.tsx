@@ -349,17 +349,17 @@ What would you like to work on today?`;
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-          <p className="text-blue-600 font-medium">Loading your AI companion...</p>
+          <p className="text-blue-400 font-medium">Loading your AI companion...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800">
       <Navbar user={user} />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -373,21 +373,21 @@ What would you like to work on today?`;
             <Button
               onClick={() => router.push('/student/tools')}
               variant="outline"
-              className="border-gray-300 text-gray-700 hover:bg-gray-50"
+              className="border-gray-600 text-gray-300 hover:bg-gray-700 hover:text-white"
             >
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back to Tools
             </Button>
             <div className="flex-1">
-              <h1 className="text-2xl font-bold text-gray-800">AI Study Companion</h1>
-              <p className="text-gray-600">Your personalized cybersecurity learning assistant</p>
+              <h1 className="text-2xl font-bold text-white">AI Study Companion</h1>
+              <p className="text-gray-400">Your personalized cybersecurity learning assistant</p>
             </div>
             <div className="flex items-center gap-2">
               <Button
                 onClick={() => setSoundEnabled(!soundEnabled)}
                 variant="outline"
                 size="sm"
-                className="border-gray-300 text-gray-600 hover:bg-gray-50"
+                className="border-gray-600 text-gray-300 hover:bg-gray-700 hover:text-white"
               >
                 {soundEnabled ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
               </Button>
@@ -395,7 +395,7 @@ What would you like to work on today?`;
                 onClick={startNewConversation}
                 variant="outline"
                 size="sm"
-                className="border-gray-300 text-gray-600 hover:bg-gray-50"
+                className="border-gray-600 text-gray-300 hover:bg-gray-700 hover:text-white"
               >
                 <RefreshCw className="h-4 w-4" />
               </Button>
@@ -403,32 +403,32 @@ What would you like to work on today?`;
           </div>
 
           {conversationCount > 0 && (
-            <Card className="bg-blue-50 border-blue-200">
+            <Card className="bg-blue-500/20 border-blue-500/30 backdrop-blur-sm">
               <CardContent className="p-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
-                    <span className="text-gray-700 text-sm">{messages.length - 1} messages exchanged</span>
-                    <span className="text-gray-700 text-sm">Streak: {studentContext.studyStreak} days</span>
+                    <span className="text-gray-300 text-sm">{messages.length - 1} messages exchanged</span>
+                    <span className="text-gray-300 text-sm">Streak: {studentContext.studyStreak} days</span>
                   </div>
-                  <Badge className="bg-blue-100 text-blue-700 border-blue-300">Active Learning Session</Badge>
+                  <Badge className="bg-blue-500/20 text-blue-300 border-blue-500/30">Active Learning Session</Badge>
                 </div>
               </CardContent>
             </Card>
           )}
         </motion.div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 h-[calc(100vh-280px)]">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Main Chat Area */}
           <div className="lg:col-span-3">
-            <Card className="bg-white border-gray-200 h-full flex flex-col">
-              <CardHeader className="pb-4 border-b border-gray-200">
+            <Card className="bg-gradient-to-br from-gray-800/50 to-gray-900/50 backdrop-blur-sm border-gray-700/50 flex flex-col">
+              <CardHeader className="pb-4 border-b border-gray-700/50">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center">
                     <Bot className="h-5 w-5 text-white" />
                   </div>
                   <div>
-                    <CardTitle className="text-gray-800 text-lg">CyberMentor AI</CardTitle>
-                    <CardDescription className="text-gray-600">
+                    <CardTitle className="text-white text-lg">CyberMentor AI</CardTitle>
+                    <CardDescription className="text-gray-400">
                       {isTyping ? 'Analyzing your context...' : 'Ready to help with your cybersecurity journey!'}
                     </CardDescription>
                   </div>
@@ -437,7 +437,7 @@ What would you like to work on today?`;
               
               <CardContent className="flex-1 flex flex-col p-0">
                 {/* Messages Area */}
-                <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                <div className="h-96 overflow-y-auto p-4 space-y-4">
                   {messages.map((msg) => (
                     <div
                       key={msg.id}
@@ -447,11 +447,11 @@ What would you like to work on today?`;
                         <div className={`p-4 rounded-2xl ${
                           msg.sender === 'user' 
                             ? 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white' 
-                            : 'bg-gray-100 text-gray-800'
+                            : 'bg-gray-700/50 text-gray-200 backdrop-blur-sm'
                         }`}>
                           <div className="flex items-start gap-3">
                             {msg.sender === 'ai' && (
-                              <Bot className="h-4 w-4 mt-1 text-blue-600 flex-shrink-0" />
+                              <Bot className="h-4 w-4 mt-1 text-blue-400 flex-shrink-0" />
                             )}
                             <div className="whitespace-pre-wrap text-sm leading-relaxed">{msg.content}</div>
                           </div>
@@ -463,7 +463,7 @@ What would you like to work on today?`;
                               size="sm"
                               variant="ghost"
                               onClick={() => markMessageHelpful(msg.id, true)}
-                              className={`h-6 text-xs ${msg.helpful === true ? 'text-green-600' : 'text-gray-500 hover:text-green-600'}`}
+                              className={`h-6 text-xs ${msg.helpful === true ? 'text-green-400' : 'text-gray-500 hover:text-green-400'}`}
                             >
                               <ThumbsUp className="h-3 w-3" />
                             </Button>
@@ -471,7 +471,7 @@ What would you like to work on today?`;
                               size="sm"
                               variant="ghost"
                               onClick={() => markMessageHelpful(msg.id, false)}
-                              className={`h-6 text-xs ${msg.helpful === false ? 'text-red-600' : 'text-gray-500 hover:text-red-600'}`}
+                              className={`h-6 text-xs ${msg.helpful === false ? 'text-red-400' : 'text-gray-500 hover:text-red-400'}`}
                             >
                               <ThumbsDown className="h-3 w-3" />
                             </Button>
@@ -486,14 +486,14 @@ What would you like to work on today?`;
                   
                   {isTyping && (
                     <div className="flex justify-start">
-                      <div className="bg-gray-100 text-gray-800 p-4 rounded-2xl max-w-[80%]">
+                      <div className="bg-gray-700/50 text-gray-200 p-4 rounded-2xl max-w-[80%] backdrop-blur-sm">
                         <div className="flex items-center gap-3">
-                          <Bot className="h-4 w-4 text-blue-600" />
+                          <Bot className="h-4 w-4 text-blue-400" />
                           <div className="flex space-x-1">
                             {[...Array(3)].map((_, i) => (
                               <motion.div
                                 key={i}
-                                className="w-2 h-2 bg-blue-600 rounded-full"
+                                className="w-2 h-2 bg-blue-400 rounded-full"
                                 animate={{
                                   scale: [1, 1.2, 1],
                                   opacity: [0.5, 1, 0.5]
@@ -515,14 +515,14 @@ What would you like to work on today?`;
                 </div>
                 
                 {/* Input Area */}
-                <div className="border-t border-gray-200 p-4">
+                <div className="border-t border-gray-700/50 p-4">
                   <div className="flex gap-3">
                     <Input
                       value={message}
                       onChange={(e) => setMessage(e.target.value)}
                       onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && sendMessage()}
                       placeholder="Ask me about your assignments, request a quiz, or get study help..."
-                      className="bg-white border-gray-300 text-gray-800 placeholder-gray-500 focus:border-blue-500 focus:ring-blue-500"
+                      className="bg-gray-800/50 border-gray-600 text-white placeholder-gray-400 focus:border-blue-500 focus:ring-blue-500"
                       disabled={isTyping}
                     />
                     <Button
@@ -541,22 +541,22 @@ What would you like to work on today?`;
           {/* Context Sidebar */}
           <div className="lg:col-span-1 space-y-4">
             {/* Upcoming Assignments */}
-            <Card className="bg-white border-gray-200">
+            <Card className="bg-gradient-to-br from-gray-800/50 to-gray-900/50 backdrop-blur-sm border-gray-700/50">
               <CardHeader>
-                <CardTitle className="text-gray-800 text-base flex items-center gap-2">
-                  <AlertCircle className="h-4 w-4 text-orange-600" />
+                <CardTitle className="text-white text-base flex items-center gap-2">
+                  <AlertCircle className="h-4 w-4 text-orange-400" />
                   Due Soon
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
                 {studentContext.assignments.slice(0, 2).map((assignment) => (
                   <div key={assignment.id} className={`p-3 rounded-lg border-l-4 ${
-                    assignment.priority === 'high' ? 'border-red-500 bg-red-50' :
-                    assignment.priority === 'medium' ? 'border-orange-500 bg-orange-50' :
-                    'border-gray-300 bg-gray-50'
+                    assignment.priority === 'high' ? 'border-red-500 bg-red-500/10' :
+                    assignment.priority === 'medium' ? 'border-orange-500 bg-orange-500/10' :
+                    'border-gray-500 bg-gray-500/10'
                   }`}>
-                    <h4 className="font-medium text-gray-800 text-sm">{assignment.title}</h4>
-                    <p className="text-xs text-gray-600">{assignment.course}</p>
+                    <h4 className="font-medium text-white text-sm">{assignment.title}</h4>
+                    <p className="text-xs text-gray-400">{assignment.course}</p>
                     <p className="text-xs text-gray-500 mt-1">Due: {assignment.dueDate}</p>
                   </div>
                 ))}
@@ -564,42 +564,42 @@ What would you like to work on today?`;
             </Card>
 
             {/* Study Stats */}
-            <Card className="bg-white border-gray-200">
+            <Card className="bg-gradient-to-br from-gray-800/50 to-gray-900/50 backdrop-blur-sm border-gray-700/50">
               <CardHeader>
-                <CardTitle className="text-gray-800 text-base flex items-center gap-2">
-                  <BarChart3 className="h-4 w-4 text-blue-600" />
+                <CardTitle className="text-white text-base flex items-center gap-2">
+                  <BarChart3 className="h-4 w-4 text-blue-400" />
                   Your Progress
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">Study Streak</span>
+                  <span className="text-sm text-gray-400">Study Streak</span>
                   <div className="flex items-center gap-1">
-                    <span className="font-semibold text-gray-800">{studentContext.studyStreak}</span>
+                    <span className="font-semibold text-white">{studentContext.studyStreak}</span>
                     <span className="text-xs text-gray-500">days</span>
                   </div>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">Active Assignments</span>
-                  <span className="font-semibold text-gray-800">{studentContext.assignments.length}</span>
+                  <span className="text-sm text-gray-400">Active Assignments</span>
+                  <span className="font-semibold text-white">{studentContext.assignments.length}</span>
                 </div>
-                <div className="pt-2 border-t border-gray-100">
+                <div className="pt-2 border-t border-gray-700/50">
                   <p className="text-xs text-gray-500 mb-2">Next Class:</p>
-                  <p className="text-sm text-gray-700">{studentContext.nextClass}</p>
+                  <p className="text-sm text-gray-300">{studentContext.nextClass}</p>
                 </div>
               </CardContent>
             </Card>
 
             {/* AI Capabilities */}
-            <Card className="bg-gradient-to-br from-purple-50 to-pink-50 border-purple-200">
+            <Card className="bg-gradient-to-br from-purple-500/20 to-pink-500/20 backdrop-blur-sm border-purple-500/30">
               <CardHeader>
-                <CardTitle className="text-gray-800 text-base flex items-center gap-2">
-                  <Sparkles className="h-4 w-4 text-purple-600" />
+                <CardTitle className="text-white text-base flex items-center gap-2">
+                  <Sparkles className="h-4 w-4 text-purple-400" />
                   AI Features
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
-                <div className="text-xs text-gray-700 space-y-1">
+                <div className="text-xs text-gray-300 space-y-1">
                   <div className="flex items-center gap-2">
                     <span>🧠</span>
                     <span>Custom Quiz Generation</span>
@@ -625,10 +625,10 @@ What would you like to work on today?`;
             </Card>
 
             {/* Quick Actions */}
-            <Card className="bg-white border-gray-200">
+            <Card className="bg-gradient-to-br from-gray-800/50 to-gray-900/50 backdrop-blur-sm border-gray-700/50">
               <CardHeader>
-                <CardTitle className="text-gray-800 text-base flex items-center gap-2">
-                  <Zap className="h-4 w-4 text-yellow-600" />
+                <CardTitle className="text-white text-base flex items-center gap-2">
+                  <Zap className="h-4 w-4 text-yellow-400" />
                   Quick Actions
                 </CardTitle>
               </CardHeader>
@@ -636,7 +636,7 @@ What would you like to work on today?`;
                 <Button 
                   variant="outline" 
                   size="sm" 
-                  className="w-full text-left justify-start border-gray-300 text-gray-700 hover:bg-gray-50"
+                  className="w-full text-left justify-start border-gray-600 text-gray-300 hover:bg-gray-700 hover:text-white"
                   onClick={() => setMessage("Help me prepare for my network security assessment")}
                 >
                   <FileText className="h-3 w-3 mr-2" />
@@ -645,7 +645,7 @@ What would you like to work on today?`;
                 <Button 
                   variant="outline" 
                   size="sm" 
-                  className="w-full text-left justify-start border-gray-300 text-gray-700 hover:bg-gray-50"
+                  className="w-full text-left justify-start border-gray-600 text-gray-300 hover:bg-gray-700 hover:text-white"
                   onClick={() => setMessage("Generate a quiz on cryptography")}
                 >
                   <Brain className="h-3 w-3 mr-2" />
@@ -654,7 +654,7 @@ What would you like to work on today?`;
                 <Button 
                   variant="outline" 
                   size="sm" 
-                  className="w-full text-left justify-start border-gray-300 text-gray-700 hover:bg-gray-50"
+                  className="w-full text-left justify-start border-gray-600 text-gray-300 hover:bg-gray-700 hover:text-white"
                   onClick={() => setMessage("Show my study recommendations")}
                 >
                   <Target className="h-3 w-3 mr-2" />
